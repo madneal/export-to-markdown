@@ -1,0 +1,26 @@
+{
+  "name": "Export to Markdown",
+  "short_name": "ExportToMarkdown",
+  "description": "This is utilized to export the story in Medium to a markdown format file.",
+  "version": "0.0.1",
+  "background": {
+  },
+  "incons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/inco-48.png",
+    "64": "icons/icon-64.png",
+    "128": "icons/icon-128.png"
+  },
+  "permissions": [
+    "tabs",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "browser_action": {
+    "default_title": "Export to Markdown",
+    "default_icon": "icons/icon-16.png"
+  },
+  "manifest_version": 2,
+  "homepage_url": "https://github.com/neal1991",
+  "options_page": "options.html"
+}
