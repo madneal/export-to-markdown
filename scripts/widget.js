@@ -4,7 +4,21 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   chrome.tabs.query({active: true, currentWindow: true}, function(arrayOfTabs) {
     const activeTab = arraryOfTabs[0];
     const url = activeTab.url + '?format=json';
-    
+    fetch(url)
+      .then(function(res) {
+        if (res.ok) {
+          return res.text();
+        } else {
+          console.error('The fetch fails, and the response code is ' + res.status);
+        }
+      })
+      .then(function(text) {
+        const story = parseJsonToMarkdown(text);
+        console.log(story);
+      })
+      .catch(function(err) {
+        console.error(err);
+      })
   })
 })
 
@@ -47,6 +61,7 @@ function parseJsonToMarkdown(jsonStr) {
       story.markdown.push(text);
     }
   }
+  return story;
 }
 
 function processSection(s) {
