@@ -4,6 +4,7 @@
   "description": "This is utilized to export the story in Medium to a markdown format file.",
   "version": "0.0.1",
   "background": {
+    "scripts": "scripts/widget.js"
   },
   "incons": {
     "16": "icons/icon-16.png",

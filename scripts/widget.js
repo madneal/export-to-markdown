@@ -3,7 +3,8 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   //get current selected tab
   chrome.tabs.query({active: true, currentWindow: true}, function(arrayOfTabs) {
     const activeTab = arraryOfTabs[0];
-    const url = activeTab.url;
+    const url = activeTab.url + '?format=json';
+    
   })
 })
 
@@ -14,6 +15,38 @@ function parseJsonToMarkdown(jsonStr) {
   const str = jsonStr.toString(16, jsonStr.length);
   const data = JSON.parse(str);
   const article = data.value; 
+  let story = {};
+  story.title = data.title;
+  story.subtile = data.content.subtitle;
+  story.date = new Date(data.createdAt);
+  story.url = data.canonicalUrl;
+  story.language = data.detectedLanguage;
+  story.license = data.license;
+  story.sections = data.content.bodyModel.sections;
+  story.paragraphs = data.content.bodyModel.paragraphs;
+
+  let sections = [];
+  for (let i = 0; i < story.sections.length; i ++) {
+    const s = story.sections[i];
+    const section = processSection(s);
+    sections[s.startIndex] = section;
+  }
+
+  story.markdown = [];
+  story.markdown.push('\n# ' + story.title);
+  if (story.subtitle) {
+    story.markdown.push('\n## ' + story.subtile);
+  }
+  for (let i = 0; i < paragraphs.length; i ++) {
+    if (sections[i]) {
+      story.markdown.push(sections[i]);
+    }
+    const p = paragraphs[i];
+    const text = processParagraph(p);
+    if (text !== story.markdown[i]) {
+      story.markdown.push(text);
+    }
+  }
 }
 
 function processSection(s) {
@@ -97,7 +130,7 @@ function addMarkup(markups_array, open, close, start, end) {
   } else {
     markups_array[start] = open;
   }
-  if (markups_array[end]) {
+  if (markups_array[end]) { 
     markups_array[end] += close;
   } else {
     markups_array[end] = close;
