@@ -2,7 +2,7 @@
 chrome.browserAction.onClicked.addListener(function(tab) {
   //get current selected tab
   chrome.tabs.query({active: true, currentWindow: true}, function(arrayOfTabs) {
-    const activeTab = arraryOfTabs[0];
+    const activeTab = arrayOfTabs[0];
     const url = activeTab.url + '?format=json';
     fetch(url)
       .then(function(res) {
@@ -83,7 +83,7 @@ function processParagraph(p) {
         token = text.substring(previousIndex, j);
         previousIndex = j;
         tokens.push(token);
-        tokens.push(markups_array[j];)
+        tokens.push(markups_array[j]);
       }
     }
     tokens.push(text.substring(j - 1));
