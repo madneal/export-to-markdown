@@ -26,18 +26,22 @@ const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/';
 
 function parseJsonToMarkdown(jsonStr) {
   // cut the useless string to format json string
-  const str = jsonStr.toString(16, jsonStr.length);
+  const str = jsonStr.substring(16, jsonStr.length);
   const data = JSON.parse(str);
-  const article = data.value; 
+  let article = null;
+  if (!data.payload) {
+    return null;
+  }
+  article = data.payload.value;
   let story = {};
-  story.title = data.title;
-  story.subtile = data.content.subtitle;
-  story.date = new Date(data.createdAt);
-  story.url = data.canonicalUrl;
-  story.language = data.detectedLanguage;
-  story.license = data.license;
-  story.sections = data.content.bodyModel.sections;
-  story.paragraphs = data.content.bodyModel.paragraphs;
+  story.title = article.title;
+  story.subtile = article.content.subtitle;
+  story.date = new Date(article.createdAt);
+  story.url = article.canonicalUrl;
+  story.language = article.detectedLanguage;
+  story.license = article.license;
+  story.sections = article.content.bodyModel.sections;
+  story.paragraphs = article.content.bodyModel.paragraphs;
 
   let sections = [];
   for (let i = 0; i < story.sections.length; i ++) {
