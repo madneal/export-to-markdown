@@ -55,6 +55,8 @@ function parseJsonToMarkdown(jsonStr) {
   if (story.subtitle) {
     story.markdown.push('\n## ' + story.subtile);
   }
+
+  const paragraphs = story.paragraphs;
   for (let i = 0; i < paragraphs.length; i ++) {
     if (sections[i]) {
       story.markdown.push(sections[i]);
@@ -69,7 +71,7 @@ function parseJsonToMarkdown(jsonStr) {
 }
 
 function processSection(s) {
-  let setion = '';
+  let section = '';
   if (s.backgroundImage) {
     const imageWidth = parseInt(s.backgroundImage.originalWidth, 10);
     const imageSrc = MEDIYM_IMG_CDN + Math.max(imageWidth*2, 2000) + '/' + s.backgroundImage.id;
@@ -137,7 +139,7 @@ function processParagraph(p) {
   }
 
   p.text = markup + p.text;
-  if (p.alignment === 2 && p.type != 6 && p.type !==7) {
+  if (p.alignment === 2 && p.type !== 6 && p.type !==7) {
     p.text = '<center>' + p.text + '</center>';
     return p.text;
   }
