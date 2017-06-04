@@ -17,7 +17,8 @@
   "permissions": [
     "tabs",
     "http://*/*",
-    "https://*/*"
+    "https://*/*",
+    {"fileSystem": ["write", "retainEntries", "directory"]}
   ],
   "browser_action": {
     "default_title": "Export to Markdown",

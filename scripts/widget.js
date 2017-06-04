@@ -14,7 +14,11 @@ chrome.browserAction.onClicked.addListener(function(tab) {
       })
       .then(function(text) {
         const story = parseJsonToMarkdown(text);
-        console.log(story);
+        return story.markdown;
+      })
+      .then(function(contents) {
+        let savedFileEntry, fileDisplayPath;
+        doExportToDisk(savedFileEntry);
       })
       .catch(function(err) {
         console.error(err);
@@ -83,8 +87,9 @@ function processSection(s) {
 function processParagraph(p) {
   const markups_array = createMarkupsArray(p.markups);
   if (markups_array.length > 0) {
-    var previousIndex = 0, text = p.text, tokens = [];
-    for (let j = 0; j <markups_array.length; j++) {
+    let previousIndex = 0, text = p.text, tokens = [];
+    let j = 0;
+    for (; j <markups_array.length; j++) {
       if (markups_array[j]) {
         token = text.substring(previousIndex, j);
         previousIndex = j;
@@ -105,10 +110,10 @@ function processParagraph(p) {
       p.text = '\n#' + p.text.replace(/\n/g, '\n#');
       break;
     case 3:
-      p.text = '\n##' + p.text.repace(/\n/g, '\n##');
+      p.text = '\n##' + p.text.replace(/\n/g, '\n##');
       break;
     case 4: //image and caption
-      const imageWidth = parseInt(p.metadata.orgionWidth, 10);
+      const imageWidth = parseInt(p.metadata.originalWidth, 10);
       const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth*2, 2000) + '/' + p.metadata
       .id;
       p.text = '\n![' + p.text + '](' + imageSrc + ')';
@@ -141,8 +146,8 @@ function processParagraph(p) {
   p.text = markup + p.text;
   if (p.alignment === 2 && p.type !== 6 && p.type !==7) {
     p.text = '<center>' + p.text + '</center>';
-    return p.text;
   }
+  return p.text;
 }
 
 function addMarkup(markups_array, open, close, start, end) {
@@ -182,4 +187,45 @@ function createMarkupsArray(markups) {
     }
   }
   return markups_array;
+}
+
+function doExportToDisk(savedFileEntry) {
+  if (savedFileEntry) {
+    exportToFileEntry(savedFileEntry);
+  } else {
+    chrome.fileSystem.chooseEntry({
+      type: 'saveFile',
+      accepts: [{description: 'Markdown files (*.md)',
+                extensions: ['txt']}],
+      acceptsAllTypes: true
+    }, exportToFileEntry);
+  }
+}
+
+function exportToFileEntry(fileEntry) {
+  savedFileEntry = fileEntry;
+
+  chrome.fileSystem.getDisplayPath(fileEntry, function(path) {
+    fileDisplayPath = path;
+  });
+
+  fileEntry.createWriter(function(fileWriter) {
+    let truncated = false;
+    let blob = new Blob([contents]);
+
+    fileWriter.onwriteend = function(e) {
+      if (!truncated) {
+        truncated = true;
+        this.truncate(blob.size);
+        return;
+      }
+      console.log('Export to ' + fileDisplayPath + ' completed');
+    };
+
+    fileWriter.onerror = function(e) {
+      console.error('Export failed: ' + e.toString());
+    };
+
+    fileWriter.write(blob);
+  })
 }
