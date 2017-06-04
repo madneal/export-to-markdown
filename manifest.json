@@ -5,7 +5,8 @@
   "version": "0.0.1",
   "background": {
     "scripts": [
-      "scripts/widget.js"
+      "scripts/widget.js",
+      "scripts/snarkdown.js"
     ]
   },
   "icons": {
