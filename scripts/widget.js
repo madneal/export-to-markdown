@@ -14,12 +14,14 @@ chrome.browserAction.onClicked.addListener(function(tab) {
       })
       .then(function(text) {
         const story = parseJsonToMarkdown(text);
-        return story.markdown;
+        document.querySelector('#source').value = story.markdown;
+        document.querySelector('.right-area').innerHTML = 
+        // return story.markdown;
       })
-      .then(function(contents) {
-        let savedFileEntry, fileDisplayPath;
-        doExportToDisk(savedFileEntry);
-      })
+      // .then(function(contents) {
+      //   let savedFileEntry, fileDisplayPath;
+      //   doExportToDisk(savedFileEntry);
+      // })
       .catch(function(err) {
         console.error(err);
       })
