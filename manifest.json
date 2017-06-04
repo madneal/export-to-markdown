@@ -22,7 +22,8 @@
   ],
   "browser_action": {
     "default_title": "Export to Markdown",
-    "default_icon": "icons/icon-19.png"
+    "default_icon": "icons/icon-19.png",
+    "default_popup": "popup.html"
   },
   "manifest_version": 2,
   "homepage_url": "https://github.com/neal1991"
