@@ -14,8 +14,9 @@ chrome.browserAction.onClicked.addListener(function(tab) {
       })
       .then(function(text) {
         const story = parseJsonToMarkdown(text);
+        const markdownText = story.markdown.join('');
         document.querySelector('#source').value = story.markdown;
-        document.querySelector('.right-area').innerHTML = 
+        document.querySelector('.right-area').innerHTML = snarkdown(story.markdown);
         // return story.markdown;
       })
       // .then(function(contents) {
