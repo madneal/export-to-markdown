@@ -1,18 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="scripts/widget.js"></script>
-  </head>
-  <body>
-    <h1>The export result</h1>
-    <div class="main">
-      <div class="left-area">
-        <textarea id="source"></textarea>
-      </div>
-      <div class="right-area"></div>
+
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    textarea {
+      width: 800px;
+      height: 600px;
+    }
+
+    body {
+      width: 800px;
+      height: 600px;
+    }
+
+    ul li {
+      list-style: none;
+      display: inline;
+      margin-right: 5px;
+    }
+
+    h1,
+    button {
+      display: inline;
+    }
+  </style>
+</head>
+
+<body>
+  <ul>
+    <li>
+      <h1>The export result</h1>
+    </li>
+    <li><button class="export">export</button></li>
+  </ul>
+
+
+  <div class="main">
+    <div class="left-area">
+      <textarea id="source"></textarea>
     </div>
-  </body>
+    <div class="right-area"></div>
+  </div>
+  <script src="scripts/snarkdown.js"></script>
+  <script src="scripts/widget.js"></script>
+</body>
+
 </html>
