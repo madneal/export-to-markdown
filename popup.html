@@ -26,6 +26,24 @@
     button {
       display: inline;
     }
+
+    img {
+      width: 50px;
+      height: 50px;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: rotate(360deg);
+      transition: all 1s ease-in-out;
+    }
+
+    span:hover {
+      transform: rotate(180deg);
+      -moz-animation-iteration-count: infinite;
+      -webkit-animation-iteration-count: infinite;
+      -o-animation-iteration-count: infinite;
+      transition: all 1s ease-in-out;
+    }
   </style>
 </head>
 
@@ -37,7 +55,7 @@
     <li><button class="export">export</button></li>
   </ul>
 
-
+  <span><img src="load.svg"></span>
   <div class="main">
     <div class="left-area">
       <textarea id="source"></textarea>
