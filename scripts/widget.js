@@ -5,15 +5,15 @@
 // })
 
   document.querySelector('.export').addEventListener('click', function () {
-    document.querySelector('body').style.background = '#eee';
-    document.querySelector('img').style.visibility = 'visible';
+    document.querySelector('body').style.background = '#eee'
+    document.querySelector('img').style.visibility = 'visible'
     exportMedium()
-    document.querySelector('body').style.background = '#fff';
-    document.querySelector('img').style.visibility = 'none';
+    document.querySelector('body').style.background = '#fff'
+    document.querySelector('img').style.visibility = 'none'
   })
 
   document.querySelector('.copy').addEventListener('click', function() {
-    const value = document.querySelector('#source').value;
+    const value = document.querySelector('#source').value
     copyToClipboard(value);
   })
 
@@ -36,12 +36,7 @@ function exportMedium () {
         const markdownText = story.markdown.join('');
         document.querySelector('#source').value = markdownText;
         document.querySelector('.right-area').innerHTML = snarkdown(markdownText);
-      // return story.markdown
       })
-      // .then(function(contents) {
-      //   let savedFileEntry, fileDisplayPath
-      //   doExportToDisk(savedFileEntry)
-      // })
       .catch(function (err) {
         console.error(err)
       })
@@ -75,20 +70,20 @@ function parseJsonToMarkdown (jsonStr) {
   }
 
   story.markdown = []
-  story.markdown.push('\n# ' + story.title)
-  if (story.subtitle) {
-    story.markdown.push('\n## ' + story.subtile)
-  }
+  // story.markdown.push('\n# ' + story.title)
+  // if (story.subtitle) {
+  //   story.markdown.push('\n## ' + story.subtile)
+  // }
 
   const paragraphs = story.paragraphs
   for (let i = 0; i < paragraphs.length; i++) {
     if (sections[i]) {
       story.markdown.push(sections[i])
     }
-    const p = paragraphs[i]
-    const text = processParagraph(p)
+    const p = paragraphs[i];
+    const text = processParagraph(p);
     if (text !== story.markdown[i]) {
-      story.markdown.push(text)
+      story.markdown.push(text);
     }
   }
   return story
@@ -127,16 +122,17 @@ function processParagraph (p) {
       markup = '\n'
       break
     case 2:
-      p.text = '\n#' + p.text.replace(/\n/g, '\n#')
+      p.text = '\n # ' + p.text.replace(/\n/g, '\n #') + '\n'
       break
     case 3:
-      p.text = '\n##' + p.text.replace(/\n/g, '\n##')
+      p.text = '\n \n ## ' + p.text.replace(/\n/g, '\n ##') + '\n'
       break
     case 4: // image and caption
       const imageWidth = parseInt(p.metadata.originalWidth, 10)
       const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + p.metadata
         .id
-      p.text = '\n![' + p.text + '](' + imageSrc + ')'
+      p.text = '\n ![' + p.text + '](' + imageSrc + ')' + '\n'
+      break
     case 6:
       markup = '> '
       break
@@ -147,16 +143,16 @@ function processParagraph (p) {
       p.text = '\n    ' + p.text.replace(/\n/g, '\n    ')
       break
     case 9:
-      markup = '\n*'
+      markup = '\n *'
       break
     case 10:
-      markup = '\n1. '
+      markup = '\n 1. '
       break
     case 11:
-      p.text = '\n<iframe src="https://medium.com/media/' + p.iframe.mediaResourceId + '" frameborder=0></iframe>'
+      p.text = '\n <iframe src="https://medium.com/media/' + p.iframe.mediaResourceId + '" frameborder=0></iframe>'
       break
     case 13:
-      markup = '\n###'
+      markup = '\n ### '
       break
     case 15:
       p.text = '*' + p.text + '*'
