@@ -33,16 +33,48 @@
       position: fixed;
       left: 50%;
       top: 50%;
-      transform: rotate(360deg);
-      transition: all 1s ease-in-out;
+      -webkit-animation: spin1 2s infinite linear;
+      -moz-animation: spin1 2s infinite linear;
+      -o-animation: spin1 2s infinite linear;
+      -ms-animation: spin1 2s infinite linear;
+      animation: spin1 2s infinite linear;
+      display: block;
     }
 
-    span:hover {
-      transform: rotate(180deg);
-      -moz-animation-iteration-count: infinite;
-      -webkit-animation-iteration-count: infinite;
-      -o-animation-iteration-count: infinite;
-      transition: all 1s ease-in-out;
+    @-webkit-keyframes spin1 {
+      0% {
+        -webkit-transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+
+    @-moz-keyframes spin1 {
+      0% {
+        -moz-transform: rotate(0deg);
+      }
+      100% {
+        -moz-transform: rotate(360deg);
+      }
+    }
+
+    @-o-keyframes spin1 {
+      0% {
+        -o-transform: rotate(0deg);
+      }
+      100% {
+        -o-transform: rotate(360deg);
+      }
+    }
+
+    @-ms-keyframes spin1 {
+      0% {
+        -ms-transform: rotate(0deg);
+      }
+      100% {
+        -ms-transform: rotate(360deg);
+      }
     }
   </style>
 </head>
@@ -53,6 +85,7 @@
       <h1>The export result</h1>
     </li>
     <li><button class="export">export</button></li>
+    <li><button class="copy">copy to clipboard</button></li>
   </ul>
 
   <span><img src="load.svg"></span>

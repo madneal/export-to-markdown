@@ -8,6 +8,11 @@
     exportMedium()
   })
 
+  document.querySelector('.copy').addEventListener('click', function() {
+    const value = document.querySelector('#source').value;
+    copyToClipboard(value);
+  })
+
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
 function exportMedium () {
@@ -198,4 +203,28 @@ function createMarkupsArray (markups) {
     }
   }
   return markups_array
+}
+
+function copyToClipboard(input) {
+  const el = document.createElement('textarea');
+  el.value = input;
+
+  el.setAttribute('readonly', '');
+	el.style.contain = 'strict';
+	el.style.all = 'unset';
+	el.style.position = 'absolute';
+	el.style.left = '-9999px';
+	el.style.fontSize = '12pt'; 
+
+	document.body.appendChild(el);
+	el.select();
+
+	let success = false;
+	try {
+		success = document.execCommand('copy');
+	} catch (err) {}
+
+	document.body.removeChild(el);
+
+	return success;
 }
