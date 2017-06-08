@@ -5,7 +5,11 @@
 // })
 
   document.querySelector('.export').addEventListener('click', function () {
+    document.querySelector('body').style.background = '#eee';
+    document.querySelector('img').style.visibility = 'visible';
     exportMedium()
+    document.querySelector('body').style.background = '#fff';
+    document.querySelector('img').style.visibility = 'none';
   })
 
   document.querySelector('.copy').addEventListener('click', function() {

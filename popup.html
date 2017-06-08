@@ -39,6 +39,7 @@
       -ms-animation: spin1 2s infinite linear;
       animation: spin1 2s infinite linear;
       display: block;
+      visibility: hidden;
     }
 
     @-webkit-keyframes spin1 {
@@ -88,7 +89,7 @@
     <li><button class="copy">copy to clipboard</button></li>
   </ul>
 
-  <span><img src="load.svg"></span>
+  <span><img src="load.svg" class="load"></span>
   <div class="main">
     <div class="left-area">
       <textarea id="source"></textarea>
