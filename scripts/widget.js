@@ -137,16 +137,16 @@ function processParagraph (p) {
       markup = '\n'
       break
     case 2:
-      p.text = '\n # ' + p.text.replace(/\n/g, '\n #') + '\n'
+      p.text = '\n # ' + p.text.replace(/\n/g, '\n #') + ' \n'
       break
     case 3:
-      p.text = '\n \n ## ' + p.text.replace(/\n/g, '\n ##') + '\n'
+      p.text = '\n \n ## ' + p.text.replace(/\n/g, '\n ##') + ' \n'
       break
     case 4: // image and caption
       const imageWidth = parseInt(p.metadata.originalWidth, 10)
       const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + p.metadata
         .id
-      p.text = '\n ![' + p.text + '](' + imageSrc + ')' + '\n'
+      p.text = '\n ![' + p.text + '](' + imageSrc + ')' + ' \n'
       break
     case 6:
       markup = '> '
@@ -231,12 +231,12 @@ function copyToClipboard(input) {
 	el.style.left = '-9999px';
 	el.style.fontSize = '12pt'; 
 
-	document.body.appendChild(el);
-	el.select();
+	document.body.appendChild(el)
+	select(el)
 
 	let success = false;
 	try {
-		success = document.execCommand('copy');
+		success = document.execCommand('copy', true);
 	} catch (err) {}
 
 	document.body.removeChild(el);
