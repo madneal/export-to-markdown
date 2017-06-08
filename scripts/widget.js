@@ -3,21 +3,35 @@
 //   // get current selected tab
 //   exportMedium()
 // })
+let mainDiv = document.querySelector('.main')
+const loadIcon = document.querySelector('.load')
 
-  document.querySelector('.export').addEventListener('click', function () {
-    document.querySelector('body').style.background = '#eee'
-    document.querySelector('img').style.visibility = 'visible'
-    exportMedium()
-    document.querySelector('body').style.background = '#fff'
-    document.querySelector('img').style.visibility = 'none'
-  })
+document.querySelector('.export').addEventListener('click', function () {
+  createLoadForm()
+  loadIcon.style.visibility = 'visible'
+  exportMedium()
+})
 
-  document.querySelector('.copy').addEventListener('click', function() {
-    const value = document.querySelector('#source').value
-    copyToClipboard(value);
-  })
+document.querySelector('.copy').addEventListener('click', function() {
+  const value = document.querySelector('#source').value
+  copyToClipboard(value);
+})
 
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
+
+function createLoadForm() {
+  let shadow = document.createElement('div')
+  shadow.id = 'shadow'
+  const oHeight = document.documentElement.scrollHeight
+  shadow.style.height = oHeight + 'px'
+  mainDiv.appendChild(shadow)
+}
+
+function cancelLoad() {
+  const len = mainDiv.childNodes.length
+  mainDiv.removeChild(mainDiv.childNodes[len - 1])
+  loadIcon.style.visibility = 'hidden'
+}
 
 function exportMedium () {
   chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
@@ -32,8 +46,9 @@ function exportMedium () {
         }
       })
       .then(function (text) {
-        const story = parseJsonToMarkdown(text);
-        const markdownText = story.markdown.join('');
+        const story = parseJsonToMarkdown(text)
+        const markdownText = story.markdown.join('')
+        cancelLoad()
         document.querySelector('#source').value = markdownText;
         document.querySelector('.right-area').innerHTML = snarkdown(markdownText);
       })

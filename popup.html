@@ -27,6 +27,17 @@
       display: inline;
     }
 
+    #shadow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      background-color: #000;
+      opacity: .2;
+      filter: alpha(opacity=20);
+    }
+
     img {
       width: 50px;
       height: 50px;
@@ -81,16 +92,17 @@
 </head>
 
 <body>
-  <ul>
-    <li>
-      <h1>The export result</h1>
-    </li>
-    <li><button class="export">export</button></li>
-    <li><button class="copy">copy to clipboard</button></li>
-  </ul>
 
-  <span><img src="load.svg" class="load"></span>
   <div class="main">
+    <ul>
+      <li>
+        <h1>The export result</h1>
+      </li>
+      <li><button class="export">export</button></li>
+      <li><button class="copy">copy to clipboard</button></li>
+    </ul>
+
+    <span><img src="load.svg" class="load"></span>
     <div class="left-area">
       <textarea id="source"></textarea>
     </div>
