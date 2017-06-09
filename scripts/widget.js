@@ -5,6 +5,7 @@
 // })
 let mainDiv = document.querySelector('.main')
 const loadIcon = document.querySelector('.load')
+const exportBtn = document.querySelector('.export')
 
 document.querySelector('.export').addEventListener('click', function () {
   createLoadForm()
@@ -137,16 +138,16 @@ function processParagraph (p) {
       markup = '\n'
       break
     case 2:
-      p.text = '\n # ' + p.text.replace(/\n/g, '\n #') + ' \n'
+      p.text = '# ' + p.text.replace(/\n/g, '\n #') + ' \n'
       break
     case 3:
-      p.text = '\n \n ## ' + p.text.replace(/\n/g, '\n ##') + ' \n'
+      p.text = '## ' + p.text.replace(/\n/g, '\n ##') + ' \n'
       break
     case 4: // image and caption
       const imageWidth = parseInt(p.metadata.originalWidth, 10)
       const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + p.metadata
         .id
-      p.text = '\n ![' + p.text + '](' + imageSrc + ')' + ' \n'
+      p.text = '![' + p.text + '](' + imageSrc + ')' + ' \n'
       break
     case 6:
       markup = '> '
@@ -222,17 +223,18 @@ function createMarkupsArray (markups) {
 
 function copyToClipboard(input) {
   const el = document.createElement('textarea');
-  el.value = input;
 
-  el.setAttribute('readonly', '');
-	el.style.contain = 'strict';
-	el.style.all = 'unset';
-	el.style.position = 'absolute';
-	el.style.left = '-9999px';
-	el.style.fontSize = '12pt'; 
+  el.style.fontsize = '12pt'
+  el.style.border = '0'
+  el.style.padding = '0'
+  el.style.margin = '0'
+  el.style.position = 'absolute'
+  el.style.left = '-9999px'
+  el.setAttribute('readonly', '')
+  el.value = input
 
 	document.body.appendChild(el)
-	select(el)
+	el.select()
 
 	let success = false;
 	try {
