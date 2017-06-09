@@ -150,7 +150,7 @@ function processParagraph (p) {
       p.text = '![' + p.text + '](' + imageSrc + ')' + ' \n'
       break
     case 6:
-      markup = '> '
+      markup = '>  '
       break
     case 7:
       p.text = '> # ' + p.text.replace(/\n/g, '\n> #')
@@ -168,14 +168,15 @@ function processParagraph (p) {
       p.text = '\n <iframe src="https://medium.com/media/' + p.iframe.mediaResourceId + '" frameborder=0></iframe>'
       break
     case 13:
-      markup = '\n ### '
+      markup = '### '
       break
     case 15:
       p.text = '*' + p.text + '*'
       break
   }
 
-  p.text = markup + p.text
+  p.text = markup + p.text + '\n'
+  
   if (p.alignment === 2 && p.type !== 6 && p.type !== 7) {
     p.text = '<center>' + p.text + '</center>'
   }
