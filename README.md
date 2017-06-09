@@ -3,7 +3,7 @@ A Chrome extension to export the story in Medium to a markdown format file.
 
 ## Sample image
 
-![image](https://user-images.githubusercontent.com/12164075/26960464-15999076-4d0a-11e7-9ea8-f8aa55991348.png)
+![deyunde](https://user-images.githubusercontent.com/12164075/26960726-fc486212-4d0b-11e7-9f59-1cb738db9e4e.gif)
 
 ## Features
 
