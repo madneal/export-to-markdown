@@ -159,7 +159,7 @@ function processParagraph (p) {
       p.text = '\n    ' + p.text.replace(/\n/g, '\n    ')
       break
     case 9:
-      markup = '\n *'
+      markup = '\n * '
       break
     case 10:
       markup = '\n 1. '
@@ -225,6 +225,7 @@ function createMarkupsArray (markups) {
 function copyToClipboard(input) {
   const el = document.createElement('textarea');
 
+  // el.style.all = 'unset'
   el.style.fontsize = '12pt'
   el.style.border = '0'
   el.style.padding = '0'
