@@ -153,7 +153,7 @@ function processParagraph (p) {
       markup = '>  '
       break
     case 7:
-      p.text = '> # ' + p.text.replace(/\n/g, '\n> #')
+      p.text = '> # ' + p.text.replace(/\n/g, '\n> #') + '\n'
       break
     case 8:
       p.text = '\n    ' + p.text.replace(/\n/g, '\n    ')
