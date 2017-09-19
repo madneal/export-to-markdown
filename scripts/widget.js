@@ -150,7 +150,7 @@ function processParagraph (p) {
       p.text = '\n    ' + p.text.replace(/\n/g, '\n    ') 
       break
     case 9:
-      markup = '\n* ' + ''
+      markup = '\n* '
       break
     case 10:
       markup = '\n 1. '
