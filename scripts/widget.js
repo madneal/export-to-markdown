@@ -1,8 +1,3 @@
-// Called when the user clicks on the browser action.
-// chrome.browserAction.onClicked.addListener(function (tab) {
-//   // get current selected tab
-//   exportMedium()
-// })
 let mainDiv = document.querySelector('.main')
 const loadIcon = document.querySelector('.load')
 const exportBtn = document.querySelector('.export')
@@ -86,10 +81,6 @@ function parseJsonToMarkdown (jsonStr) {
   }
 
   story.markdown = []
-  // story.markdown.push('\n# ' + story.title)
-  // if (story.subtitle) {
-  //   story.markdown.push('\n## ' + story.subtile)
-  // }
 
   const paragraphs = story.paragraphs
   for (let i = 0; i < paragraphs.length; i++) {
@@ -99,7 +90,7 @@ function parseJsonToMarkdown (jsonStr) {
     const p = paragraphs[i];
     const text = processParagraph(p);
     if (text !== story.markdown[i]) {
-      story.markdown.push(text);
+      story.markdown.push(text)
     }
   }
   return story
@@ -138,28 +129,28 @@ function processParagraph (p) {
       markup = '\n'
       break
     case 2:
-      p.text = '# ' + p.text.replace(/\n/g, '\n #') + ' \n'
+      p.text = '\n# ' + p.text.replace(/\n/g, '\n #')
       break
     case 3:
-      p.text = '## ' + p.text.replace(/\n/g, '\n ##') + ' \n'
+      p.text = '\n## ' + p.text.replace(/\n/g, '\n ##')
       break
-    case 4: // image and caption
+    case 4: 
       const imageWidth = parseInt(p.metadata.originalWidth, 10)
       const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + p.metadata
         .id
-      p.text = '![' + p.text + '](' + imageSrc + ')' + ' \n'
+      p.text = '\n![' + p.text + '](' + imageSrc + ')' 
       break
     case 6:
       markup = '>  '
       break
     case 7:
-      p.text = '> # ' + p.text.replace(/\n/g, '\n> #') + '\n'
+      p.text = '> # ' + p.text.replace(/\n/g, '\n> #') 
       break
     case 8:
-      p.text = '\n    ' + p.text.replace(/\n/g, '\n    ')
+      p.text = '\n    ' + p.text.replace(/\n/g, '\n    ') 
       break
     case 9:
-      markup = '\n * '
+      markup = '\n* ' + ''
       break
     case 10:
       markup = '\n 1. '
@@ -168,7 +159,7 @@ function processParagraph (p) {
       p.text = '\n <iframe src="https://medium.com/media/' + p.iframe.mediaResourceId + '" frameborder=0></iframe>'
       break
     case 13:
-      markup = '### '
+      markup = '\n### ' 
       break
     case 15:
       p.text = '*' + p.text + '*'
@@ -198,10 +189,10 @@ function addMarkup (markups_array, open, close, start, end) {
 }
 
 function createMarkupsArray (markups) {
-  if (!markups || markups.length === 0) {
-    return []
-  }
   let markups_array = []
+  if (!markups || markups.length === 0) {
+    return markups_array
+  }
   for (let i = 0; i < markups.length; i++) {
     const m = markups[i]
     switch (m.type) {
@@ -224,8 +215,6 @@ function createMarkupsArray (markups) {
 
 function copyToClipboard(input) {
   const el = document.createElement('textarea');
-
-  // el.style.all = 'unset'
   el.style.fontsize = '12pt'
   el.style.border = '0'
   el.style.padding = '0'
