@@ -8,7 +8,7 @@ document.querySelector('.export').addEventListener('click', function () {
   exportMedium()
 })
 
-document.querySelector('.copy').addEventListener('click', function() {
+document.querySelector('.copy').addEventListener('click', function () {
   const value = document.querySelector('#source').value
   copyToClipboard(value);
 })
@@ -29,8 +29,8 @@ function cancelLoad() {
   loadIcon.style.visibility = 'hidden'
 }
 
-function exportMedium () {
-  chrome.tabs.query({active: true, currentWindow: true}, function (arrayOfTabs) {
+function exportMedium() {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
     const activeTab = arrayOfTabs[0]
     const url = activeTab.url + '?format=json'
     fetch(url)
@@ -54,7 +54,7 @@ function exportMedium () {
   })
 }
 
-function parseJsonToMarkdown (jsonStr) {
+function parseJsonToMarkdown(jsonStr) {
   // cut the useless string to format json string
   const str = jsonStr.substring(16, jsonStr.length)
   const data = JSON.parse(str)
@@ -83,12 +83,20 @@ function parseJsonToMarkdown (jsonStr) {
   story.markdown = []
 
   const paragraphs = story.paragraphs
+  let lastPtype = '';
+  let sequence = 0;
   for (let i = 0; i < paragraphs.length; i++) {
     if (sections[i]) {
       story.markdown.push(sections[i])
     }
     const p = paragraphs[i];
-    const text = processParagraph(p);
+    if (p.type === 10) {
+      sequence++;
+    } else {
+      sequence = 0
+    }
+    const text = processParagraph(p, sequence);
+    lastPtype = p.type;
     if (text !== story.markdown[i]) {
       story.markdown.push(text)
     }
@@ -96,7 +104,7 @@ function parseJsonToMarkdown (jsonStr) {
   return story
 }
 
-function processSection (s) {
+function processSection(s) {
   let section = ''
   if (s.backgroundImage) {
     const imageWidth = parseInt(s.backgroundImage.originalWidth, 10)
@@ -106,7 +114,7 @@ function processSection (s) {
   return section
 }
 
-function processParagraph (p) {
+function processParagraph(p, sequence) {
   const markups_array = createMarkupsArray(p.markups)
   if (markups_array.length > 0) {
     let previousIndex = 0, text = p.text, tokens = []
@@ -134,32 +142,32 @@ function processParagraph (p) {
     case 3:
       p.text = '\n## ' + p.text.replace(/\n/g, '\n ##')
       break
-    case 4: 
+    case 4:
       const imageWidth = parseInt(p.metadata.originalWidth, 10)
       const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + p.metadata
         .id
-      p.text = '\n![' + p.text + '](' + imageSrc + ')' 
+      p.text = '\n![' + p.text + '](' + imageSrc + ')'
       break
     case 6:
       markup = '>  '
       break
     case 7:
-      p.text = '> # ' + p.text.replace(/\n/g, '\n> #') 
+      p.text = '> # ' + p.text.replace(/\n/g, '\n> #')
       break
     case 8:
-      p.text = '\n    ' + p.text.replace(/\n/g, '\n    ') 
+      p.text = '\n    ' + p.text.replace(/\n/g, '\n    ')
       break
     case 9:
       markup = '\n* '
       break
     case 10:
-      markup = '\n 1. '
+      markup = '\n ' + sequence + '. '
       break
     case 11:
       p.text = '\n <iframe src="https://medium.com/media/' + p.iframe.mediaResourceId + '" frameborder=0></iframe>'
       break
     case 13:
-      markup = '\n### ' 
+      markup = '\n### '
       break
     case 15:
       p.text = '*' + p.text + '*'
@@ -167,14 +175,14 @@ function processParagraph (p) {
   }
 
   p.text = markup + p.text + '\n'
-  
+
   if (p.alignment === 2 && p.type !== 6 && p.type !== 7) {
     p.text = '<center>' + p.text + '</center>'
   }
   return p.text
 }
 
-function addMarkup (markups_array, open, close, start, end) {
+function addMarkup(markups_array, open, close, start, end) {
   if (markups_array[start]) {
     markups_array[start] += open
   } else {
@@ -188,7 +196,7 @@ function addMarkup (markups_array, open, close, start, end) {
   return markups_array
 }
 
-function createMarkupsArray (markups) {
+function createMarkupsArray(markups) {
   let markups_array = []
   if (!markups || markups.length === 0) {
     return markups_array
@@ -204,6 +212,11 @@ function createMarkupsArray (markups) {
         break
       case 3: // anchor tag
         addMarkup(markups_array, '[', '](' + m.href + ')', m.start, m.end)
+        break
+      case 10: // code tag
+        if (m.end - m.start < 30) {
+          addMarkup(markups_array, '`', '`', m.start, m.end)
+        }
         break
       default:
         console.log('Unknown markup type' + m.type, m)
@@ -224,15 +237,15 @@ function copyToClipboard(input) {
   el.setAttribute('readonly', '')
   el.value = input
 
-	document.body.appendChild(el)
-	el.select()
+  document.body.appendChild(el)
+  el.select()
 
-	let success = false;
-	try {
-		success = document.execCommand('copy', true);
-	} catch (err) {}
+  let success = false;
+  try {
+    success = document.execCommand('copy', true);
+  } catch (err) { }
 
-	document.body.removeChild(el);
+  document.body.removeChild(el);
 
-	return success;
+  return success;
 }
