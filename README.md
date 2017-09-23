@@ -5,8 +5,9 @@ A Chrome extension to export the story in Medium to a markdown format file.
 
 ![deyunde](https://user-images.githubusercontent.com/12164075/26960726-fc486212-4d0b-11e7-9f59-1cb738db9e4e.gif)
 
-## Usage
-
+## Install
+* You can go to the [Web Store](https://chrome.google.com/webstore/detail/export-to-markdown/dodkihcbgpjblncjahodbnlgkkflliim?utm_source=chrome-ntp-icon&authuser=1) to install.
+* Or you can install it manunally:
 1. Open `chrome://extensions` in Chrome, and enable developer mode.
 2. Click 'load unzip extension' button, and select the `export-medium` file folder.
 
