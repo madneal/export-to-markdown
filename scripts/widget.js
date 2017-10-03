@@ -1,6 +1,7 @@
 let mainDiv = document.querySelector('.main')
 const loadIcon = document.querySelector('.load')
 const exportBtn = document.querySelector('.export')
+const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
 document.querySelector('.export').addEventListener('click', function () {
   createLoadForm()
@@ -12,8 +13,6 @@ document.querySelector('.copy').addEventListener('click', function () {
   const value = document.querySelector('#source').value
   copyToClipboard(value);
 })
-
-const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
 function createLoadForm() {
   let shadow = document.createElement('div')
