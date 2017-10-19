@@ -82,7 +82,7 @@ function parseJsonToMarkdown(jsonStr) {
   story.markdown = []
 
   const paragraphs = story.paragraphs
-  let lastPtype = '';
+  let lastPtype = ''
   let sequence = 0;
   for (let i = 0; i < paragraphs.length; i++) {
     if (sections[i]) {
