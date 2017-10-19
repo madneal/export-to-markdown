@@ -42,6 +42,7 @@ function exportMedium() {
       })
       .then(function (text) {
         const story = parseJsonToMarkdown(text)
+        saveHistory(story.title)
         const markdownText = story.markdown.join('')
         cancelLoad()
         document.querySelector('#source').value = markdownText;
@@ -51,6 +52,10 @@ function exportMedium() {
         console.error(err)
       })
   })
+}
+
+function saveHistory(title, url) {
+  localStorage.setItem(title, url);
 }
 
 function parseJsonToMarkdown(jsonStr) {
