@@ -88,14 +88,14 @@ function parseJsonToMarkdown(jsonStr) {
 
   const paragraphs = story.paragraphs
   let lastPtype = ''
-  let sequence = 0;
+  let sequence = 0
   for (let i = 0; i < paragraphs.length; i++) {
     if (sections[i]) {
       story.markdown.push(sections[i])
     }
     const p = paragraphs[i];
     if (p.type === 10) {
-      sequence++;
+      sequence++
     } else {
       sequence = 0
     }
@@ -131,6 +131,7 @@ function processParagraph(p, sequence) {
         tokens.push(markups_array[j])
       }
     }
+    tokens = processMarkupSpace(tokens)
     tokens.push(text.substring(j - 1))
     p.text = tokens.join('')
   }
@@ -186,6 +187,24 @@ function processParagraph(p, sequence) {
   return p.text
 }
 
+// for the first position is space
+function processMarkupSpace(tokens) {
+  let times = 0 // markup times
+  for (let i = 0; i < tokens.length; i++) {
+    const ele = tokens[i]
+    if (ele === '**' || ele === '*' || ele === '[' || ele === ']') {
+      times = times + 1;
+      if (times % 2 === 1 && tokens[i + 1] && tokens[i + 1][0] === ' ') {
+        console.log(tokens[i + 1]);
+        tokens[i + 1] = tokens[i + 1].substring(1);
+        tokens[i - 1] = tokens[i - 1] + ' '
+        i = i + 1;
+      }
+    }
+  }
+  return tokens;
+}
+
 function addMarkup(markups_array, open, close, start, end) {
   if (markups_array[start]) {
     markups_array[start] += open
@@ -217,11 +236,11 @@ function createMarkupsArray(markups) {
       case 3: // anchor tag
         addMarkup(markups_array, '[', '](' + m.href + ')', m.start, m.end)
         break
-      case 10: // code tag
-        if (m.end - m.start < 30) {
-          addMarkup(markups_array, '`', '`', m.start, m.end)
-        }
-        break
+      // case 10: // code tag
+      //   if (m.end - m.start < 30) {
+      //     addMarkup(markups_array, '`', '`', m.start, m.end)
+      //   }
+      //   break
       default:
         console.log('Unknown markup type' + m.type, m)
         break
