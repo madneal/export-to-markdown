@@ -1,9 +1,13 @@
 let mainDiv = document.querySelector('.main')
 const loadIcon = document.querySelector('.load')
 const exportBtn = document.querySelector('.export')
+const sourceDiv = document.querySelector('#source')
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
 document.querySelector('.export').addEventListener('click', function () {
+  if (sourceDiv.style.display === 'none') {
+    sourceDiv.style.display = 'block'
+  }
   createLoadForm()
   loadIcon.style.visibility = 'visible'
   exportMedium()
@@ -12,6 +16,10 @@ document.querySelector('.export').addEventListener('click', function () {
 document.querySelector('.copy').addEventListener('click', function () {
   const value = document.querySelector('#source').value
   copyToClipboard(value);
+})
+
+document.querySelector('.history').addEventListener('click', function() {
+  displayHistory()
 })
 
 function createLoadForm() {
@@ -42,7 +50,7 @@ function exportMedium() {
       })
       .then(function (text) {
         const story = parseJsonToMarkdown(text)
-        saveHistory(story.title)
+        saveHistory(story.title, activeTab.url)
         const markdownText = story.markdown.join('')
         cancelLoad()
         document.querySelector('#source').value = markdownText;
@@ -56,6 +64,18 @@ function exportMedium() {
 
 function saveHistory(title, url) {
   localStorage.setItem(title, url);
+}
+
+function displayHistory() {
+  let list = ''
+  for (const ele in localStorage) {
+    const title = ele
+    const url = localStorage.getItem(title)
+    const str = '* [' + title + '](' + url + ')\n'
+    list = list + str
+  }
+  document.querySelector('.right-area').innerHTML = snarkdown(list)
+  sourceDiv.style.display = 'none'
 }
 
 function parseJsonToMarkdown(jsonStr) {
@@ -195,7 +215,6 @@ function processMarkupSpace(tokens) {
     if (ele === '**' || ele === '*' || ele === '[' || ele === ']') {
       times = times + 1;
       if (times % 2 === 1 && tokens[i + 1] && tokens[i + 1][0] === ' ') {
-        console.log(tokens[i + 1]);
         tokens[i + 1] = tokens[i + 1].substring(1);
         tokens[i - 1] = tokens[i - 1] + ' '
         i = i + 1;
