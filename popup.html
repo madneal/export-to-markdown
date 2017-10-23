@@ -11,20 +11,31 @@
       height: 600px;
     }
 
+    .right-area {
+      font-size: 18px;
+    }
+
     body {
       width: 800px;
       height: 600px;
     }
 
-    ul li {
+    .buttons li {
       list-style: none;
       display: inline;
       margin-right: 5px;
+      font-size: 16px;
+      font-weight: bold;
     }
 
     h1,
     button {
       display: inline;
+      color: gray;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+      filter: alpha(opacity=50)
     }
 
     #shadow {
@@ -94,10 +105,7 @@
 <body>
 
   <div class="main">
-    <ul>
-      <li>
-        <h1>The export result</h1>
-      </li>
+    <ul class="buttons">
       <li><button class="export">export</button></li>
       <li><button class="copy">copy to clipboard</button></li>
       <li><button class="history">history</button></li>
