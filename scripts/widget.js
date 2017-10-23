@@ -2,6 +2,7 @@ let mainDiv = document.querySelector('.main')
 const loadIcon = document.querySelector('.load')
 const exportBtn = document.querySelector('.export')
 const sourceDiv = document.querySelector('#source')
+const rightAreaDiv = document.querySelector('.right-area')
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
 document.querySelector('.export').addEventListener('click', function () {
@@ -74,7 +75,8 @@ function displayHistory() {
     const str = '* [' + title + '](' + url + ')\n'
     list = list + str
   }
-  document.querySelector('.right-area').innerHTML = snarkdown(list)
+  rightAreaDiv.innerHTML = snarkdown(list)
+  rightAreaDiv.querySelector('ul').className = 'history-list'
   sourceDiv.style.display = 'none'
 }
 
