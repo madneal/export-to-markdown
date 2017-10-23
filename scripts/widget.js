@@ -6,7 +6,7 @@ const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
 document.querySelector('.export').addEventListener('click', function () {
   if (sourceDiv.style.display === 'none') {
-    sourceDiv.style.display = 'block'
+    sourceDiv.style.display = null
   }
   createLoadForm()
   loadIcon.style.visibility = 'visible'
