@@ -1,5 +1,24 @@
 ## Change Log
 
+### v0.1.4 (2017/10/24 20:08 +08:00)
+- [f6a16a0](https://github.com/neal1991/export-medium/commit/f6a16a0afafa4d39b91d9deaa4630ca0ad7b2eef) remove title :fire: (@neal1991)
+- [47aa348](https://github.com/neal1991/export-medium/commit/47aa348b0572536b614a05192c57875bca9919c2) modify version :arrow_up: (@neal1991)
+- [2c72b4c](https://github.com/neal1991/export-medium/commit/2c72b4c008cd0105ac213bd9811f0a13aadd3d34) modify history list :lipstick: (@neal1991)
+- [ba3d0e6](https://github.com/neal1991/export-medium/commit/ba3d0e6c4e3f075ef2b1bf05fce1b6f471ed1d29) remove font-size :bug: (@neal1991)
+- [b0c261f](https://github.com/neal1991/export-medium/commit/b0c261fe391f3e4d91a51af0a8f4769e0fe8e4bd) add history :rocket: (@neal1991)
+- [a2dd38d](https://github.com/neal1991/export-medium/commit/a2dd38de01471948efe3fb4ddec6cd4db9dd2c0f) Merge branch 'master' of https://github.com/neal1991/export-medium (@neal1991)
+- [d2e5d17](https://github.com/neal1991/export-medium/commit/d2e5d17f51f9762580d68a58dd956488ac79c30b) add history :rocket: (@neal1991)
+- [8f32843](https://github.com/neal1991/export-medium/commit/8f32843ae044c746beaf4c2ca2fe8c54c0076c5b) add _blank for a link :art: (@neal1991)
+- [dddfc18](https://github.com/neal1991/export-medium/commit/dddfc187b0bfe8deb90e46a487c732025c9bbe85) add changelog :memo: (@neal1991)
+
+### v0.1.3 (2017/10/22 17:07 +08:00)
+- [54d36cd](https://github.com/neal1991/export-medium/commit/54d36cd9fde9316113f8a9de0051b7c3af102109) fix markup space in first position :bug: (@neal1991)
+- [5b8f90e](https://github.com/neal1991/export-medium/commit/5b8f90e865286a5ef64cdf0ebb7b334c740d301d) add history (@neal1991)
+- [0f6cf0e](https://github.com/neal1991/export-medium/commit/0f6cf0ef3955dc231eebec025ac283379bac58ae) remove colomon :fire: (@neal1991)
+- [a108af8](https://github.com/neal1991/export-medium/commit/a108af862e9cd02c58ee073af5664c1bf87b70e5) modify manifest (@neal1991)
+- [d839e98](https://github.com/neal1991/export-medium/commit/d839e98c61510811322df2194aafd1992bbf85dd) modify permission for only https (@neal1991)
+- [262c834](https://github.com/neal1991/export-medium/commit/262c83468cdfceabbbd24535f87d0b5a642b2c2f) add changelog :memo: (@neal1991)
+
 ### v0.1.1 (2017/09/24 10:46 +08:00)
 - [eefd796](https://github.com/neal1991/export-medium/commit/eefd796c0d7c1f2d7921b90bc08159e901191c3a) modify manifest (@neal1991)
 - [a441b12](https://github.com/neal1991/export-medium/commit/a441b123cac29ce15cd3f5abd3ba92eacab69281) Update README.md (@neal1991)
