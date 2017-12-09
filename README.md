@@ -13,6 +13,8 @@ A Chrome extension to export the story in Medium to a markdown format file.
   2. Click 'load unzip extension' button, and select the `export-medium` file folder.
 
 ## Changelog
+### v0.1.5
+* enable to delete history
 
 ### v0.1.4
 * modify style of popup page
