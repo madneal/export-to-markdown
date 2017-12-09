@@ -3,7 +3,6 @@ const loadIcon = document.querySelector('.load')
 const exportBtn = document.querySelector('.export')
 const sourceDiv = document.querySelector('#source')
 const rightAreaDiv = document.querySelector('.right-area')
-const historyDiv = document.querySelector('.history-list')
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
 exportBtn.addEventListener('click', function () {
