@@ -14,6 +14,10 @@ A Chrome extension to export the story in Medium to a markdown format file.
 
 ## Changelog
 
+### v0.1.4
+* modify style of popup page
+* add export history by default
+
 ### v0.1.1
 * export the story to a markdown format text
 * just click a button, you can copy the markdown to your clipboard
