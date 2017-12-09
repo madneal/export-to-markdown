@@ -3,9 +3,10 @@ const loadIcon = document.querySelector('.load')
 const exportBtn = document.querySelector('.export')
 const sourceDiv = document.querySelector('#source')
 const rightAreaDiv = document.querySelector('.right-area')
+const historyDiv = document.querySelector('.history-list')
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
-document.querySelector('.export').addEventListener('click', function () {
+exportBtn.addEventListener('click', function () {
   if (sourceDiv.style.display === 'none') {
     sourceDiv.style.display = null
   }
@@ -21,6 +22,12 @@ document.querySelector('.copy').addEventListener('click', function () {
 
 document.querySelector('.history').addEventListener('click', function() {
   displayHistory()
+  document.querySelector('.history-list').addEventListener('click', function (event) {
+    const parentLi = event.target.parentElement
+    const deletedKey = parentLi.firstElementChild.innerText
+    parentLi.remove()
+    localStorage.removeItem(deletedKey)
+  })
 })
 
 function createLoadForm() {
@@ -72,7 +79,7 @@ function displayHistory() {
   for (const ele in localStorage) {
     const title = ele
     const url = localStorage.getItem(title)
-    const str = '* [' + title + '](' + url + ')\n'
+    const str = '* [' + title + '](' + url + ') ![trash](icons/trash-can.png)\n'
     list = list + str
   }
   rightAreaDiv.innerHTML = snarkdown(list)
