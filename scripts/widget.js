@@ -47,6 +47,7 @@ function exportMedium() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
     const activeTab = arrayOfTabs[0]
     const url = activeTab.url + '?format=json'
+    isHtml = (url.indexOf('elastic') !== -1)
     fetch(url)
       .then(function (res) {
         if (res.ok) {
@@ -55,13 +56,29 @@ function exportMedium() {
           console.error('The fetch fails, and the response code is ' + res.status)
         }
       })
-      .then(function (text) {
-        const story = parseJsonToMarkdown(text)
-        saveHistory(story.title, activeTab.url)
-        const markdownText = story.markdown.join('')
+      .then(function (res) {
+        let markdownText = ''
+        let title = ''
+        if (isHtml) {
+          const parser = new DOMParser()
+          const doc = parser.parseFromString(res, 'text/html')
+          var blog = doc.querySelector('.article-post-wrapper')
+          title = doc.querySelector('.blog-details h2')
+          const turndownService = new TurndownService()
+          markdownText = turndownService.turndown(blog)
+        } else {
+          const story = parseJsonToMarkdown(res)
+          markdownText = story.markdown.join('')
+          title = story.title
+        }      
+        saveHistory(title, activeTab.url)
         cancelLoad()
         document.querySelector('#source').value = markdownText;
-        document.querySelector('.right-area').innerHTML = snarkdown(markdownText);
+        if (isHtml) {
+          document.querySelector('.right-area').innerHTML = blog.innerHTML
+        } else {
+          document.querySelector('.right-area').innerHTML = snarkdown(markdownText);
+        }
       })
       .catch(function (err) {
         console.error(err)
