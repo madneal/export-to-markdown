@@ -86,6 +86,12 @@ function exportMedium() {
       })
       .catch(function (err) {
         console.error(err)
+        document.querySelector('.left-area').display = 'none'
+        markdownText = 'The website site ' + activeTab.url + ' may is not supported now.\nThe error infomation is:' + err + 
+                  '.\nIt is appreciated that you can attach the error information at [issue](https://github.com/neal1991/export-medium/issues). '
+                  + 'You can click the "copy to clipboard" button to copy the information to the clipboard. Thanks.'
+        document.querySelector('#source').value = markdownText
+        document.querySelector('.right-area').innerHTML = snarkdown(markdownText)
         cancelLoad()
       })
   })
