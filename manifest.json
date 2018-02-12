@@ -2,7 +2,7 @@
   "name": "Export to Markdown",
   "short_name": "ExportToMarkdown",
   "description": "This is utilized to export the story in Medium to a markdown format file.",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "icons": {
     "16": "icons/medium-16.png",
     "48": "icons/medium-48.png",

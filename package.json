@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "archiver": "^2.1.1",
+    "del": "^3.0.0"
+  }
+}
