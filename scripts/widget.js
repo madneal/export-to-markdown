@@ -105,9 +105,11 @@ function displayHistory() {
   let list = ''
   for (const ele in localStorage) {
     const title = ele
-    const url = localStorage.getItem(title)
-    const str = '* [' + title + '](' + url + ') ![trash](icons/trash-can.png)\n'
-    list = list + str
+    if (localStorage.hasOwnProperty(ele)) {
+      const url = localStorage.getItem(title)
+      const str = '* [' + title + '](' + url + ') ![trash](icons/trash-can.png)\n'
+      list = list + str
+    }
   }
   rightAreaDiv.innerHTML = snarkdown(list)
   rightAreaDiv.querySelector('ul').className = 'history-list'
