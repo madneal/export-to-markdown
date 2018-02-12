@@ -63,9 +63,13 @@ function exportMedium() {
           const parser = new DOMParser()
           const doc = parser.parseFromString(res, 'text/html')
           var blog = doc.querySelector('.article-post-wrapper')
-          title = doc.querySelector('.blog-details h2')
+          title = doc.querySelector('.full-bleed-data h2').innerText
           const turndownService = new TurndownService()
-          markdownText = turndownService.turndown(blog)
+          if (title != null) {
+            markdownText = '# ' + title + '\n' + turndownService.turndown(blog)
+          } else {
+            markdownText = turndownService.turndown(blog)
+          }
         } else {
           const story = parseJsonToMarkdown(res)
           markdownText = story.markdown.join('')
@@ -82,6 +86,7 @@ function exportMedium() {
       })
       .catch(function (err) {
         console.error(err)
+        cancelLoad()
       })
   })
 }
