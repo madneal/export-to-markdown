@@ -5,14 +5,14 @@ const sourceDiv = document.querySelector('#source')
 const rightAreaDiv = document.querySelector('.right-area')
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
 
-exportBtn.addEventListener('click', function () {
+window.onload = function() {
   if (sourceDiv.style.display === 'none') {
     sourceDiv.style.display = null
   }
   createLoadForm()
   loadIcon.style.visibility = 'visible'
   exportMedium()
-})
+}
 
 document.querySelector('.copy').addEventListener('click', function () {
   const value = document.querySelector('#source').value
