@@ -1,6 +1,8 @@
 import os
 import shutil
 import zipfile
+import json
+
 zip_dir = 'export-to-markdown'
 zip_filename = zip_dir + '.zip'
 
@@ -23,10 +25,27 @@ def zip():
       print(root + ':' + file)
       zipf.write(os.path.join(root, file))
 
+def modify_version():
+  with open(zip_dir + '/manifest.json', 'r') as f:
+    manifest = json.load(f)
+  version = manifest['version']
+  version = version.replace('.', '')
+  version = int(version)
+  version = version + 1
+  version = str(version)
+  version = '.'.join(version)
+  if len(version) < 4:
+    version = '0.' + version
+  manifest['version'] = version
+  with open(zip_dir + '/manifest.json', 'w') as f:
+    json.dump(manifest, f) 
+
 if __name__ == '__main__':
   if os.path.isdir(zip_dir):
     shutil.rmtree(zip_dir)
-  os.remove(zip_filename)
+  if os.path.exists(zip_filename):
+    os.remove(zip_filename)
   create_dir()
   move_files()
+  modify_version()
   zip()
