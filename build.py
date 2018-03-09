@@ -26,7 +26,8 @@ def zip():
       zipf.write(os.path.join(root, file))
 
 def modify_version():
-  with open(zip_dir + '/manifest.json', 'r') as f:
+  manifest_path = zip_dir + '/manifest.json'
+  with open(manifest_path, 'r') as f:
     manifest = json.load(f)
   version = manifest['version']
   version = version.replace('.', '')
@@ -37,8 +38,9 @@ def modify_version():
   if len(version) < 4:
     version = '0.' + version
   manifest['version'] = version
-  with open(zip_dir + '/manifest.json', 'w') as f:
-    json.dump(manifest, f) 
+  with open(manifest_path, 'w') as f:
+    json.dump(manifest, f, indent=4, separators=(',', ':')) 
+  shutil.copyfile(manifest_path, 'manifest.json')
 
 if __name__ == '__main__':
   if os.path.isdir(zip_dir):
