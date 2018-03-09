@@ -1,8 +1,11 @@
-# export-medium
+# export-to-markdown
 A Chrome extension to export the story in Medium to a markdown format file. And the chrome extension is going to support to obtain markdown text for more blog websites. Aany suggestion is welcome.
 
-## Sample image
+## Suppoted websites
+* https://medium.com
+* https://elastic.co/blog
 
+## Sample image
 ![deyunde](https://user-images.githubusercontent.com/12164075/26960726-fc486212-4d0b-11e7-9f59-1cb738db9e4e.gif)
 
 ## Install
@@ -11,6 +14,9 @@ A Chrome extension to export the story in Medium to a markdown format file. And 
 
   1. Open `chrome://extensions` in Chrome, and enable developer mode.
   2. Click 'load unzip extension' button, and select the `export-medium` file folder.
+  
+## Build
+Run ` python build.py` to generate the zip file
 
 ## Changelog
 ### v0.1.7
