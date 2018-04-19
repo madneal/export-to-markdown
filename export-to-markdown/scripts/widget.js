@@ -84,8 +84,6 @@ function exportMedium() {
         document.querySelector('#source').value = markdownText;
         if (isHtml) {
           document.querySelector('.right-area').innerHTML = blog.innerHTML
-        } else {
-          document.querySelector('.right-area').innerHTML = snarkdown(markdownText);
         }
       })
       .catch(function (err) {
@@ -95,7 +93,6 @@ function exportMedium() {
                   '.\nIt is appreciated that you can attach the error information at [issue](https://github.com/neal1991/export-medium/issues). '
                   + 'You can click the "copy to clipboard" button to copy the information to the clipboard. Thanks.'
         document.querySelector('#source').value = markdownText
-        document.querySelector('.right-area').innerHTML = snarkdown(markdownText)
         cancelLoad()
       })
   })
