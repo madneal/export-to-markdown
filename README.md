@@ -1,7 +1,7 @@
 # export-to-markdown
-A Chrome extension to export the story in Medium to a markdown format file. And the chrome extension is going to support to obtain markdown text for more blog websites. Aany suggestion is welcome.
+A Chrome extension to export the story in Medium to a markdown format file. And the chrome extension is going to support to obtain markdown text for more blog websites. Any suggestion is welcome.
 
-## Suppoted websites
+## Supported websites
 * https://medium.com
 * https://elastic.co/blog
 
