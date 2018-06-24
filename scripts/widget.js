@@ -51,7 +51,7 @@ function exportMedium() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
     const activeTab = arrayOfTabs[0]
     const url = activeTab.url + '?format=json'
-    isHtml = (url.indexOf('elastic') !== -1)
+    isHtml = (url.indexOf('elastic') !== -1 || url.indexOf('logz.io/blog') !== -1)
     fetch(url)
       .then(function (res) {
         if (res.ok) {
@@ -66,8 +66,9 @@ function exportMedium() {
         if (isHtml) {
           const parser = new DOMParser()
           const doc = parser.parseFromString(res, 'text/html')
-          var blog = doc.querySelector('.article-post-wrapper')
-          title = doc.querySelector('.full-bleed-data h2').innerText
+          var blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content')
+          titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1')
+          const title = titleDoc.innerText
           const turndownService = new TurndownService()
           if (title != null) {
             markdownText = '# ' + title + '\n' + turndownService.turndown(blog)
@@ -82,9 +83,6 @@ function exportMedium() {
         saveHistory(title, activeTab.url)
         cancelLoad()
         document.querySelector('#source').value = markdownText;
-        if (isHtml) {
-          document.querySelector('.right-area').innerHTML = blog.innerHTML
-        }
       })
       .catch(function (err) {
         console.error(err)
@@ -125,7 +123,7 @@ function parseJsonToMarkdown(jsonStr) {
   if (!data.payload) {
     return null
   }
-  article = data.payload.value
+  article = data.payload.value || data.payload.post
   let story = {}
   story.title = article.title
   story.subtile = article.content.subtitle
@@ -146,7 +144,6 @@ function parseJsonToMarkdown(jsonStr) {
   story.markdown = []
 
   const paragraphs = story.paragraphs
-  let lastPtype = ''
   let sequence = 0
   for (let i = 0; i < paragraphs.length; i++) {
     if (sections[i]) {
