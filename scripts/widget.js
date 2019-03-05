@@ -168,7 +168,7 @@ function processSection(s) {
   let section = ''
   if (s.backgroundImage) {
     const imageWidth = parseInt(s.backgroundImage.originalWidth, 10)
-    const imageSrc = MEDIYM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + s.backgroundImage.id
+    const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + s.backgroundImage.id
     section = '\n![](' + imageSrc + ')'
   }
   return section
