@@ -51,7 +51,7 @@ function exportMedium() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
     const activeTab = arrayOfTabs[0]
     const url = activeTab.url + '?format=json'
-    isHtml = (url.indexOf('elastic') !== -1 || url.indexOf('logz.io/blog') !== -1)
+    isHtml = (url.includes('elastic')|| url.includes('logz.io/blog') || url.includes('github.blog'))
     fetch(url)
       .then(function (res) {
         if (res.ok) {
@@ -66,8 +66,9 @@ function exportMedium() {
         if (isHtml) {
           const parser = new DOMParser()
           const doc = parser.parseFromString(res, 'text/html')
-          var blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content')
-          titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1')
+          var blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content') || doc.querySelector('.post__content')
+          titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1') ||
+          doc.queryselector('.position-relative .h3-mktg')
           const title = titleDoc.innerText
           const turndownService = new TurndownService()
           if (title != null) {
@@ -324,6 +325,5 @@ function copyToClipboard(input) {
   } catch (err) { }
 
   document.body.removeChild(el);
-
   return success;
 }
