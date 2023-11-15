@@ -1,0 +1,26 @@
+name: Release and upload to Chrome Web Store
+on:
+  push:
+    branches: 
+      - master
+jobs:
+  publish:
+    name: Build and release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Zip release files
+        run: |
+          7z a export-to-medium.zip
+
+      - name: Upload to Chrome Store
+        uses: Klemensas/chrome-extension-upload-action@master
+        with:
+          app-id: ${{ secrets.CHROME_STORE_APP_ID }}
+          refresh-token: ${{ secrets.CHROME_STORE_REFRESH_TOKEN }}
+          client-id: ${{ secrets.CHROME_STORE_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_STORE_CLIENT_SECRET }}
+          file-name: "export-to-medium.zip"
+          publish: true
