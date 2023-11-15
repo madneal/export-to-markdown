@@ -1,4 +1,4 @@
-# export-to-markdown [![CircleCI](https://circleci.com/gh/neal1991/export-to-markdown.svg?style=svg)](https://circleci.com/gh/neal1991/export-to-markdown)
+# export-to-markdown 
 A Chrome extension to export the story in Medium to a markdown format file. And the chrome extension is going to support to obtain markdown text for more blog websites. Any suggestion is welcome.
 
 ## Supported websites
