@@ -50,8 +50,11 @@ function cancelLoad() {
 function exportMedium() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
     const activeTab = arrayOfTabs[0]
-    const url = activeTab.url + '?format=json'
-    isHtml = (url.includes('elastic')|| url.includes('logz.io/blog') || url.includes('github.blog'))
+    console.log(activeTab)
+    const isMedium = activeTab.url .includes('medium.com')
+    const url = activeTab.url + (isMedium ? '?format=json' : '')
+    let markdownText = ''
+    let title = ''
     fetch(url)
       .then(function (res) {
         if (res.ok) {
@@ -61,14 +64,12 @@ function exportMedium() {
         }
       })
       .then(function (res) {
-        let markdownText = ''
-        let title = ''
-        if (isHtml) {
+        if (!isMedium) {
           const parser = new DOMParser()
+          console.log(res)
           const doc = parser.parseFromString(res, 'text/html')
-          var blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content') || doc.querySelector('.post__content')
-          titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1') ||
-          doc.queryselector('.position-relative .h3-mktg')
+          const blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content') || doc.querySelector('.post__content')
+          const titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1') || doc.querySelector('.position-relative .h3-mktg') || doc.querySelector('#main > header > div > h1')
           const title = titleDoc.innerText
           const turndownService = new TurndownService()
           if (title != null) {
@@ -88,9 +89,7 @@ function exportMedium() {
       .catch(function (err) {
         console.error(err)
         document.querySelector('.left-area').display = 'none'
-        markdownText = 'The website site ' + activeTab.url + ' may is not supported now.\nThe error infomation is:' + err + 
-                  '.\nIt is appreciated that you can attach the error information at [issue](https://github.com/neal1991/export-medium/issues). '
-                  + 'You can click the "copy to clipboard" button to copy the information to the clipboard. Thanks.'
+        markdownText = 'The website site ' + activeTab.url + ' may is not supported now.'
         document.querySelector('#source').value = markdownText
         cancelLoad()
       })

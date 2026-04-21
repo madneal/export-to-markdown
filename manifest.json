@@ -1,8 +1,8 @@
 {
     "name":"Export to Markdown",
     "short_name":"ExportToMarkdown",
-    "description":"This is utilized to export the story in Medium to a markdown format file.",
-    "version":"0.1.9",
+    "description":"This is utilized to export the articles to markdown format, supporting limited urls.",
+    "version":"0.2.0",
     "icons":{
         "16":"icons/medium-16.png",
         "48":"icons/medium-48.png",
@@ -19,5 +19,5 @@
         "default_popup":"popup.html"
     },
     "manifest_version":2,
-    "homepage_url":"https://github.com/neal1991/export-medium"
+    "homepage_url":"https://github.com/madneal/export-medium"
 }
