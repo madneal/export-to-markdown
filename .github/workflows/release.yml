@@ -1,26 +1,105 @@
 name: Release and upload to Chrome Web Store
+
 on:
+  workflow_dispatch:
   push:
-    branches: 
+    branches:
       - master
+
+permissions:
+  contents: read
+
 jobs:
   publish:
     name: Build and release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Zip release files
+      - name: Package extension
         run: |
-          7z a export-to-medium.zip
+          zip -r export-to-markdown.zip \
+            manifest.json \
+            popup.html \
+            load.svg \
+            icons \
+            scripts \
+            -x "**/.DS_Store"
+          unzip -l export-to-markdown.zip
 
-      - name: Upload to Chrome Store
-        uses: Klemensas/chrome-extension-upload-action@master
-        with:
-          app-id: ${{ secrets.CHROME_STORE_APP_ID }}
-          refresh-token: ${{ secrets.CHROME_STORE_REFRESH_TOKEN }}
-          client-id: ${{ secrets.CHROME_STORE_CLIENT_ID }}
-          client-secret: ${{ secrets.CHROME_STORE_CLIENT_SECRET }}
-          file-name: "export-to-medium.zip"
-          publish: true
+      - name: Get Chrome Web Store access token
+        id: chrome-token
+        env:
+          CHROME_STORE_CLIENT_ID: ${{ secrets.CHROME_STORE_CLIENT_ID }}
+          CHROME_STORE_CLIENT_SECRET: ${{ secrets.CHROME_STORE_CLIENT_SECRET }}
+          CHROME_STORE_REFRESH_TOKEN: ${{ secrets.CHROME_STORE_REFRESH_TOKEN }}
+        run: |
+          response="$(
+            curl -sS -X POST https://oauth2.googleapis.com/token \
+              --data-urlencode "client_id=${CHROME_STORE_CLIENT_ID}" \
+              --data-urlencode "client_secret=${CHROME_STORE_CLIENT_SECRET}" \
+              --data-urlencode "refresh_token=${CHROME_STORE_REFRESH_TOKEN}" \
+              --data-urlencode "grant_type=refresh_token"
+          )"
+          access_token="$(jq -r '.access_token // empty' <<< "$response")"
+
+          if [ -z "$access_token" ]; then
+            echo "Failed to get Chrome Web Store access token:"
+            echo "$response"
+            exit 1
+          fi
+
+          echo "::add-mask::$access_token"
+          echo "access_token=$access_token" >> "$GITHUB_OUTPUT"
+
+      - name: Upload extension package
+        env:
+          CHROME_WEBSTORE_EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
+          CHROME_WEBSTORE_PUBLISHER_ID: ${{ secrets.CHROME_WEBSTORE_PUBLISHER_ID }}
+          CHROME_WEBSTORE_ACCESS_TOKEN: ${{ steps.chrome-token.outputs.access_token }}
+        run: |
+          upload_url="https://chromewebstore.googleapis.com/upload/v2/publishers/${CHROME_WEBSTORE_PUBLISHER_ID}/items/${CHROME_WEBSTORE_EXTENSION_ID}:upload"
+          status_url="https://chromewebstore.googleapis.com/v2/publishers/${CHROME_WEBSTORE_PUBLISHER_ID}/items/${CHROME_WEBSTORE_EXTENSION_ID}:fetchStatus"
+
+          response="$(
+            curl -sS -f -X POST \
+              -H "Authorization: Bearer ${CHROME_WEBSTORE_ACCESS_TOKEN}" \
+              -T export-to-markdown.zip \
+              "$upload_url"
+          )"
+          echo "$response" | jq .
+
+          upload_state="$(jq -r '.uploadState // empty' <<< "$response")"
+
+          for attempt in {1..12}; do
+            if [ "$upload_state" != "IN_PROGRESS" ] && [ "$upload_state" != "UPLOAD_IN_PROGRESS" ]; then
+              break
+            fi
+
+            echo "Upload still processing; checking again in 10 seconds..."
+            sleep 10
+
+            response="$(
+              curl -sS -f -X GET \
+                -H "Authorization: Bearer ${CHROME_WEBSTORE_ACCESS_TOKEN}" \
+                "$status_url"
+            )"
+            echo "$response" | jq .
+            upload_state="$(jq -r '.lastAsyncUploadState // .uploadState // empty' <<< "$response")"
+          done
+
+          if [ "$upload_state" != "SUCCEEDED" ] && [ "$upload_state" != "SUCCESS" ]; then
+            echo "Chrome Web Store upload did not succeed. Final upload state: ${upload_state:-unknown}"
+            exit 1
+          fi
+
+      - name: Publish extension
+        env:
+          CHROME_WEBSTORE_EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
+          CHROME_WEBSTORE_PUBLISHER_ID: ${{ secrets.CHROME_WEBSTORE_PUBLISHER_ID }}
+          CHROME_WEBSTORE_ACCESS_TOKEN: ${{ steps.chrome-token.outputs.access_token }}
+        run: |
+          curl -sS -f -X POST \
+            -H "Authorization: Bearer ${CHROME_WEBSTORE_ACCESS_TOKEN}" \
+            "https://chromewebstore.googleapis.com/v2/publishers/${CHROME_WEBSTORE_PUBLISHER_ID}/items/${CHROME_WEBSTORE_EXTENSION_ID}:publish"
