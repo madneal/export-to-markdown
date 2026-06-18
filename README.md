@@ -20,8 +20,11 @@ A Chrome extension for exporting articles from supported blog websites to Markdo
 This repository does not currently include a build script. To test local changes, load the project folder as an unpacked Chrome extension.
 
 ## Changelog
+### v0.3.0
+* migrate the extension manifest to Manifest V3
+
 ### v0.2.0
-* current version in `manifest.json`
+* update the extension version in `manifest.json`
 
 ### v0.1.7
 * enable export after clicking the extension icon
