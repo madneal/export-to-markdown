@@ -1,6 +1,6 @@
 # Export to Markdown
 
-A Chrome extension for exporting articles from supported blog websites to Markdown text. Suggestions are welcome.
+A Chrome extension for exporting the current webpage to Markdown text. Suggestions are welcome.
 
 ## Supported websites
 * https://medium.com
@@ -22,6 +22,11 @@ This repository does not currently include a build script. To test local changes
 ## Changelog
 ### v0.3.0
 * migrate the extension manifest to Manifest V3
+
+### v0.3.1
+* export article content directly from the active webpage
+* add a fallback for general article layouts
+* add a manual export button
 
 ### v0.2.0
 * update the extension version in `manifest.json`

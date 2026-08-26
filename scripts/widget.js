@@ -4,15 +4,16 @@ const sourceDiv = document.querySelector('#source')
 const copyBtn = document.querySelector('.copy')
 const rightAreaDiv = document.querySelector('.right-area')
 const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
+const exportBtn = document.querySelector('.export')
 
 window.onload = function() {
   if (sourceDiv.style.display === 'none') {
     sourceDiv.style.display = null
   }
-  createLoadForm()
-  loadIcon.style.visibility = 'visible'
-  exportMedium()
+  exportActivePage()
 }
+
+exportBtn.addEventListener('click', exportActivePage)
 
 document.querySelector('.copy').addEventListener('click', function () {
   copyBtn.innerText = 'copied'
@@ -34,6 +35,8 @@ document.querySelector('.history').addEventListener('click', function() {
 })
 
 function createLoadForm() {
+  const existingShadow = document.querySelector('#shadow')
+  if (existingShadow) existingShadow.remove()
   let shadow = document.createElement('div')
   shadow.id = 'shadow'
   const oHeight = document.documentElement.scrollHeight
@@ -42,58 +45,151 @@ function createLoadForm() {
 }
 
 function cancelLoad() {
-  const len = mainDiv.childNodes.length
-  mainDiv.removeChild(mainDiv.childNodes[len - 1])
+  const shadow = document.querySelector('#shadow')
+  if (shadow) shadow.remove()
   loadIcon.style.visibility = 'hidden'
 }
 
-function exportMedium() {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (arrayOfTabs) {
-    const activeTab = arrayOfTabs[0]
-    console.log(activeTab)
-    const isMedium = activeTab.url .includes('medium.com')
-    const url = activeTab.url + (isMedium ? '?format=json' : '')
-    let markdownText = ''
-    let title = ''
-    fetch(url)
-      .then(function (res) {
-        if (res.ok) {
-          return res.text()
-        } else {
-          console.error('The fetch fails, and the response code is ' + res.status)
-        }
+async function exportActivePage() {
+  createLoadForm()
+  loadIcon.style.visibility = 'visible'
+  exportBtn.disabled = true
+
+  try {
+    const [activeTab] = await new Promise(function (resolve) {
+      chrome.tabs.query({ active: true, currentWindow: true }, resolve)
+    })
+
+    if (!activeTab || !activeTab.id || !activeTab.url) {
+      throw new Error('No active webpage found.')
+    }
+
+    if (!/^https?:\/\//i.test(activeTab.url)) {
+      throw new Error('This page cannot be exported. Open an HTTP or HTTPS webpage.')
+    }
+
+    let result = null
+    if (activeTab.url.includes('medium.com')) {
+      try {
+        result = await exportMediumArticle(activeTab.url)
+      } catch (error) {
+        console.warn('Medium JSON export failed; falling back to page content.', error)
+      }
+    }
+
+    if (!result) {
+      const executions = await chrome.scripting.executeScript({
+        target: { tabId: activeTab.id },
+        func: extractPageContent
       })
-      .then(function (res) {
-        if (!isMedium) {
-          const parser = new DOMParser()
-          console.log(res)
-          const doc = parser.parseFromString(res, 'text/html')
-          const blog = doc.querySelector('.article-post-wrapper') || doc.querySelector('#content') || doc.querySelector('.post__content')
-          const titleDoc = doc.querySelector('.full-bleed-data h2') || doc.querySelector('.container .text-center h1') || doc.querySelector('.position-relative .h3-mktg') || doc.querySelector('#main > header > div > h1')
-          const title = titleDoc.innerText
-          const turndownService = new TurndownService()
-          if (title != null) {
-            markdownText = '# ' + title + '\n' + turndownService.turndown(blog)
-          } else {
-            markdownText = turndownService.turndown(blog)
-          }
-        } else {
-          const story = parseJsonToMarkdown(res)
-          markdownText = story.markdown.join('')
-          title = story.title
-        }      
-        saveHistory(title, activeTab.url)
-        cancelLoad()
-        document.querySelector('#source').value = markdownText;
-      })
-      .catch(function (err) {
-        console.error(err)
-        document.querySelector('.left-area').display = 'none'
-        markdownText = 'The website site ' + activeTab.url + ' may is not supported now.'
-        document.querySelector('#source').value = markdownText
-        cancelLoad()
-      })
+      result = executions[0] && executions[0].result
+    }
+
+    if (!result || (!result.content && !result.markdown)) {
+      throw new Error('No article content could be found on this page.')
+    }
+
+    const title = result.title || activeTab.title || 'Untitled page'
+    let markdownText
+    if (result.markdown) {
+      markdownText = '# ' + title + '\n\n' + result.markdown.trim()
+    } else {
+      const turndownService = new TurndownService()
+      const titleHtml = escapeHtml(title)
+      markdownText = turndownService.turndown(
+        '<h1>' + titleHtml + '</h1>' + result.content
+      ).trim()
+    }
+
+    saveHistory(title, result.url || activeTab.url)
+    sourceDiv.style.display = null
+    sourceDiv.value = markdownText
+  } catch (error) {
+    console.error('Export failed:', error)
+    sourceDiv.style.display = null
+    sourceDiv.value = error.message || 'The current page could not be exported.'
+  } finally {
+    exportBtn.disabled = false
+    cancelLoad()
+  }
+}
+
+async function exportMediumArticle(url) {
+  const separator = url.includes('?') ? '&' : '?'
+  const response = await fetch(url + separator + 'format=json')
+  if (!response.ok) throw new Error('Medium returned HTTP ' + response.status)
+
+  const story = parseJsonToMarkdown(await response.text())
+  if (!story || !story.markdown) throw new Error('Invalid Medium article response')
+  return {
+    title: story.title,
+    url: url,
+    markdown: story.markdown.join('')
+  }
+}
+
+function extractPageContent() {
+  if (!document.body) throw new Error('Document body not found.')
+
+  const body = document.body.cloneNode(true)
+  body.querySelectorAll(
+    'script, style, noscript, nav, footer, aside, form, .ads, .advertisement, .comments, [role="complementary"], [role="navigation"], .cookie-banner, .popup, .overlay, .modal'
+  ).forEach(function (element) {
+    element.remove()
   })
+
+  const selectors = [
+    'article',
+    'main',
+    '[role="main"]',
+    '#content',
+    '.article-post-wrapper',
+    '.post__content',
+    '.post',
+    '.entry',
+    '.content'
+  ]
+  let content = null
+  for (const selector of selectors) {
+    const candidate = body.querySelector(selector)
+    if (candidate && candidate.textContent.trim().length > 100) {
+      content = candidate
+      break
+    }
+  }
+  content = content || body
+
+  content.querySelectorAll('[href], [src]').forEach(function (element) {
+    for (const attribute of ['href', 'src']) {
+      const value = element.getAttribute(attribute)
+      if (!value) continue
+      try {
+        const resolved = new URL(value, document.baseURI)
+        if (resolved.protocol === 'http:' || resolved.protocol === 'https:') {
+          element.setAttribute(attribute, resolved.href)
+        } else {
+          element.removeAttribute(attribute)
+        }
+      } catch (error) {
+        element.removeAttribute(attribute)
+      }
+    }
+  })
+
+  return {
+    title: document.title || 'Untitled page',
+    url: document.location.href,
+    content: content.innerHTML
+  }
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
 function saveHistory(title, url) {
