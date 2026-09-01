@@ -1,5 +1,13 @@
 ## Change Log
 
+### v0.3.2 (2026/08/31)
+- extract readable page content with Mozilla Readability
+- convert HTML with Turndown and GitHub Flavored Markdown support
+- replace permanent host access with temporary `activeTab` access
+- remove the private Medium JSON endpoint and all extension-owned network requests
+- add deterministic extraction, conversion, manifest, and package tests
+- add reproducible Chrome Web Store reviewer instructions
+
 ### v0.1.7 (2018/02/14 10:12 +08:00)
 - [087a96c](https://github.com/neal1991/export-to-markdown/commit/087a96cefcb6d8be1ac3bd3b1ea61a6375cd82e0) add version modify (@neal1991)
 

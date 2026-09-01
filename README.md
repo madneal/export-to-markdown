@@ -1,55 +1,60 @@
 # Export to Markdown
 
-A Chrome extension for exporting the current webpage to Markdown text. Suggestions are welcome.
+A Manifest V3 Chrome extension that converts the active HTTP or HTTPS webpage to Markdown locally in the browser.
 
-## Supported websites
-* https://medium.com
-* https://elastic.co/blog
+## Conversion pipeline
 
-## Sample image
-![demo](https://user-images.githubusercontent.com/12164075/26960726-fc486212-4d0b-11e7-9f59-1cb738db9e4e.gif)
+- [Mozilla Readability](https://github.com/mozilla/readability) extracts the page's primary readable content.
+- [Turndown](https://github.com/mixmark-io/turndown) converts the extracted HTML to Markdown.
+- [Turndown Plugin GFM](https://github.com/mixmark-io/turndown-plugin-gfm) preserves tables, task lists, strikethrough, and fenced code blocks.
+- A semantic `article`/`main` fallback handles short pages that Readability intentionally skips.
 
-## Install
-* Install it from the [Chrome Web Store](https://chrome.google.com/webstore/detail/export-to-markdown/dodkihcbgpjblncjahodbnlgkkflliim?utm_source=chrome-ntp-icon&authuser=1).
-* Or install it manually:
+All conversion code is bundled with the extension. The extension does not fetch a private site API, load remote code, or send page content to a server.
 
-  1. Open `chrome://extensions` in Chrome, and enable developer mode.
-  2. Click `Load unpacked`, and select the `export-to-markdown` project folder.
-  
-## Build
-This repository does not currently include a build script. To test local changes, load the project folder as an unpacked Chrome extension.
+## Install for testing
 
-## Changelog
-### v0.3.0
-* migrate the extension manifest to Manifest V3
+1. Run `npm ci`.
+2. Run `npm run vendor` if the locked third-party dependencies were updated.
+3. Open `chrome://extensions` in Chrome and enable **Developer mode**.
+4. Click **Load unpacked** and select this repository folder.
+5. Open a normal HTTP or HTTPS webpage and click the extension icon.
 
-### v0.3.1
-* export article content directly from the active webpage
-* add a fallback for general article layouts
-* add a manual export button
+Chrome does not allow extensions to read protected pages such as `chrome://` pages or the Chrome Web Store.
 
-### v0.2.0
-* update the extension version in `manifest.json`
+## Verify
 
-### v0.1.7
-* enable export after clicking the extension icon
-* enable copy-to-clipboard indication
+Run the deterministic extraction, conversion, and manifest tests:
 
-### v0.1.6
-* support for [elastic blog](https://www.elastic.co/blog)
-* enable error message display
+```sh
+npm test
+```
 
-### v0.1.5
-* enable to delete history
+Run the end-to-end suite in an isolated Chrome for Testing profile:
 
-### v0.1.4
-* modify style of popup page
-* add export history by default
+```sh
+npx playwright install chromium
+npm run test:browser
+```
 
-### v0.1.1
-* export the story to a markdown format text
-* just click a button, you can copy the markdown to your clipboard
+The browser suite invokes the real extension action and verifies rich and short pages, live Chrome and MDN documentation, copy/retry/history behavior, and the protected-page error state.
 
-## LICENSE
+Build and validate the same ZIP package used by the release workflow:
 
-[MIT](LICENSE)
+```sh
+npm run package
+```
+
+The generated package is `export-to-markdown.zip`.
+
+Chrome Web Store permission justifications and reviewer steps are documented in [CHROME_WEB_STORE.md](CHROME_WEB_STORE.md).
+
+## Permissions
+
+- `activeTab`: temporarily reads the active page only after the user invokes the extension.
+- `scripting`: injects the locally bundled Readability extractor into that active page.
+
+The extension requests no permanent host permissions.
+
+## License
+
+[MIT](LICENSE). Third-party notices are listed in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).

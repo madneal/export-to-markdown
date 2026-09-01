@@ -17,16 +17,30 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
 
-      - name: Package extension
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium for extension tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Test and package extension
+        run: npm run package
+
+      - name: Extract packaged extension
         run: |
-          zip -r export-to-markdown.zip \
-            manifest.json \
-            popup.html \
-            load.svg \
-            icons \
-            scripts \
-            -x "**/.DS_Store"
-          unzip -l export-to-markdown.zip
+          mkdir -p "$RUNNER_TEMP/export-to-markdown"
+          unzip -q export-to-markdown.zip -d "$RUNNER_TEMP/export-to-markdown"
+
+      - name: Test packaged extension in Chromium
+        env:
+          EXTENSION_PATH: ${{ runner.temp }}/export-to-markdown
+        run: xvfb-run --auto-servernum npm run test:browser
 
       - name: Get Chrome Web Store access token
         id: chrome-token

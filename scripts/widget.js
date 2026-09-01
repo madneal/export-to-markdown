@@ -1,424 +1,189 @@
-let mainDiv = document.querySelector('.main')
-const loadIcon = document.querySelector('.load')
-const sourceDiv = document.querySelector('#source')
-const copyBtn = document.querySelector('.copy')
-const rightAreaDiv = document.querySelector('.right-area')
-const MEDIUM_IMG_CDN = 'https://cdn-images-1.medium.com/max/'
-const exportBtn = document.querySelector('.export')
+(function () {
+  'use strict'
 
-window.onload = function() {
-  if (sourceDiv.style.display === 'none') {
-    sourceDiv.style.display = null
+  const HISTORY_KEY = 'exportToMarkdownHistoryV2'
+  const MAX_HISTORY_ITEMS = 20
+  const source = document.querySelector('#source')
+  const status = document.querySelector('#status')
+  const exportButton = document.querySelector('#export-button')
+  const copyButton = document.querySelector('#copy-button')
+  const historyButton = document.querySelector('#history-button')
+  const historyPanel = document.querySelector('#history-panel')
+  const historyList = document.querySelector('#history-list')
+  const emptyHistory = document.querySelector('#empty-history')
+  const loading = document.querySelector('#loading')
+
+  exportButton.addEventListener('click', convertActivePage)
+  copyButton.addEventListener('click', copyMarkdown)
+  historyButton.addEventListener('click', toggleHistory)
+
+  convertActivePage()
+
+  function setStatus(message, state) {
+    status.textContent = message
+    status.dataset.state = state || 'idle'
   }
-  exportActivePage()
-}
 
-exportBtn.addEventListener('click', exportActivePage)
-
-document.querySelector('.copy').addEventListener('click', function () {
-  copyBtn.innerText = 'copied'
-  const value = document.querySelector('#source').value
-  copyToClipboard(value);
-  setTimeout(function() {
-    copyBtn.innerText = 'copy to clipboard'
-  }, 2000)
-})
-
-document.querySelector('.history').addEventListener('click', function() {
-  displayHistory()
-  document.querySelector('.history-list').addEventListener('click', function (event) {
-    const parentLi = event.target.parentElement
-    const deletedKey = parentLi.firstElementChild.innerText
-    parentLi.remove()
-    localStorage.removeItem(deletedKey)
-  })
-})
-
-function createLoadForm() {
-  const existingShadow = document.querySelector('#shadow')
-  if (existingShadow) existingShadow.remove()
-  let shadow = document.createElement('div')
-  shadow.id = 'shadow'
-  const oHeight = document.documentElement.scrollHeight
-  shadow.style.height = oHeight + 'px'
-  mainDiv.appendChild(shadow)
-}
-
-function cancelLoad() {
-  const shadow = document.querySelector('#shadow')
-  if (shadow) shadow.remove()
-  loadIcon.style.visibility = 'hidden'
-}
-
-async function exportActivePage() {
-  createLoadForm()
-  loadIcon.style.visibility = 'visible'
-  exportBtn.disabled = true
-
-  try {
-    const [activeTab] = await new Promise(function (resolve) {
-      chrome.tabs.query({ active: true, currentWindow: true }, resolve)
-    })
-
-    if (!activeTab || !activeTab.id || !activeTab.url) {
-      throw new Error('No active webpage found.')
-    }
-
-    if (!/^https?:\/\//i.test(activeTab.url)) {
-      throw new Error('This page cannot be exported. Open an HTTP or HTTPS webpage.')
-    }
-
-    let result = null
-    if (activeTab.url.includes('medium.com')) {
-      try {
-        result = await exportMediumArticle(activeTab.url)
-      } catch (error) {
-        console.warn('Medium JSON export failed; falling back to page content.', error)
-      }
-    }
-
-    if (!result) {
-      const executions = await chrome.scripting.executeScript({
-        target: { tabId: activeTab.id },
-        func: extractPageContent
-      })
-      result = executions[0] && executions[0].result
-    }
-
-    if (!result || (!result.content && !result.markdown)) {
-      throw new Error('No article content could be found on this page.')
-    }
-
-    const title = result.title || activeTab.title || 'Untitled page'
-    let markdownText
-    if (result.markdown) {
-      markdownText = '# ' + title + '\n\n' + result.markdown.trim()
-    } else {
-      const turndownService = new TurndownService()
-      const titleHtml = escapeHtml(title)
-      markdownText = turndownService.turndown(
-        '<h1>' + titleHtml + '</h1>' + result.content
-      ).trim()
-    }
-
-    saveHistory(title, result.url || activeTab.url)
-    sourceDiv.style.display = null
-    sourceDiv.value = markdownText
-  } catch (error) {
-    console.error('Export failed:', error)
-    sourceDiv.style.display = null
-    sourceDiv.value = error.message || 'The current page could not be exported.'
-  } finally {
-    exportBtn.disabled = false
-    cancelLoad()
+  function setBusy(isBusy) {
+    loading.hidden = !isBusy
+    exportButton.disabled = isBusy
+    historyButton.disabled = isBusy
   }
-}
 
-async function exportMediumArticle(url) {
-  const separator = url.includes('?') ? '&' : '?'
-  const response = await fetch(url + separator + 'format=json')
-  if (!response.ok) throw new Error('Medium returned HTTP ' + response.status)
-
-  const story = parseJsonToMarkdown(await response.text())
-  if (!story || !story.markdown) throw new Error('Invalid Medium article response')
-  return {
-    title: story.title,
-    url: url,
-    markdown: story.markdown.join('')
-  }
-}
-
-function extractPageContent() {
-  if (!document.body) throw new Error('Document body not found.')
-
-  const body = document.body.cloneNode(true)
-  body.querySelectorAll(
-    'script, style, noscript, nav, footer, aside, form, .ads, .advertisement, .comments, [role="complementary"], [role="navigation"], .cookie-banner, .popup, .overlay, .modal'
-  ).forEach(function (element) {
-    element.remove()
-  })
-
-  const selectors = [
-    'article',
-    'main',
-    '[role="main"]',
-    '#content',
-    '.article-post-wrapper',
-    '.post__content',
-    '.post',
-    '.entry',
-    '.content'
-  ]
-  let content = null
-  for (const selector of selectors) {
-    const candidate = body.querySelector(selector)
-    if (candidate && candidate.textContent.trim().length > 100) {
-      content = candidate
-      break
-    }
-  }
-  content = content || body
-
-  content.querySelectorAll('[href], [src]').forEach(function (element) {
-    for (const attribute of ['href', 'src']) {
-      const value = element.getAttribute(attribute)
-      if (!value) continue
-      try {
-        const resolved = new URL(value, document.baseURI)
-        if (resolved.protocol === 'http:' || resolved.protocol === 'https:') {
-          element.setAttribute(attribute, resolved.href)
-        } else {
-          element.removeAttribute(attribute)
+  function queryActiveTab() {
+    return new Promise(function (resolve, reject) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        const error = chrome.runtime.lastError
+        if (error) {
+          reject(new Error(error.message))
+          return
         }
-      } catch (error) {
-        element.removeAttribute(attribute)
+        resolve(tabs[0])
+      })
+    })
+  }
+
+  function isSupportedPage(url) {
+    return /^https?:\/\//i.test(url || '')
+  }
+
+  async function extractActivePage(tabId) {
+    const executions = await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      files: [
+        'scripts/vendor/Readability.js',
+        'scripts/extractor.js'
+      ]
+    })
+    return executions[0] && executions[0].result
+  }
+
+  async function convertActivePage() {
+    setBusy(true)
+    setStatus('Reading current page...', 'idle')
+    showMarkdown()
+
+    try {
+      const activeTab = await queryActiveTab()
+      if (!activeTab || !activeTab.id) throw new Error('No active webpage was found.')
+      if (!isSupportedPage(activeTab.url)) {
+        throw new Error('Chrome only allows this extension to convert HTTP and HTTPS webpages.')
       }
-    }
-  })
 
-  return {
-    title: document.title || 'Untitled page',
-    url: document.location.href,
-    content: content.innerHTML
-  }
-}
+      const article = await extractActivePage(activeTab.id)
+      if (!article || !article.content) {
+        throw new Error('No readable content was found on this page.')
+      }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
+      const markdown = MarkdownConverter.convertArticle(article)
+      source.value = markdown
+      copyButton.disabled = false
+      saveHistory(article.title, article.url)
 
-function saveHistory(title, url) {
-  localStorage.setItem(title, url);
-}
-
-function displayHistory() {
-  let list = ''
-  for (const ele in localStorage) {
-    const title = ele
-    if (localStorage.hasOwnProperty(ele)) {
-      const url = localStorage.getItem(title)
-      const str = '* [' + title + '](' + url + ') ![trash](icons/trash-can.png)\n'
-      list = list + str
+      const method = article.extractionMethod === 'readability' ? 'Readability' : 'page fallback'
+      setStatus('Converted ' + article.length + ' characters with ' + method + '.', 'success')
+    } catch (error) {
+      console.error('Export failed:', error)
+      source.value = ''
+      copyButton.disabled = true
+      setStatus(formatError(error), 'error')
+    } finally {
+      setBusy(false)
     }
   }
-  rightAreaDiv.innerHTML = snarkdown(list)
-  rightAreaDiv.querySelector('ul').className = 'history-list'
-  sourceDiv.style.display = 'none'
-}
 
-function parseJsonToMarkdown(jsonStr) {
-  // cut the useless string to format json string
-  const str = jsonStr.substring(16, jsonStr.length)
-  const data = JSON.parse(str)
-  let article = null
-  if (!data.payload) {
-    return null
-  }
-  article = data.payload.value || data.payload.post
-  let story = {}
-  story.title = article.title
-  story.subtile = article.content.subtitle
-  story.date = new Date(article.createdAt)
-  story.url = article.canonicalUrl
-  story.language = article.detectedLanguage
-  story.license = article.license
-  story.sections = article.content.bodyModel.sections
-  story.paragraphs = article.content.bodyModel.paragraphs
-
-  let sections = []
-  for (let i = 0; i < story.sections.length; i++) {
-    const s = story.sections[i]
-    const section = processSection(s)
-    sections[s.startIndex] = section
-  }
-
-  story.markdown = []
-
-  const paragraphs = story.paragraphs
-  let sequence = 0
-  for (let i = 0; i < paragraphs.length; i++) {
-    if (sections[i]) {
-      story.markdown.push(sections[i])
+  function formatError(error) {
+    const message = error && error.message ? error.message : 'The current page could not be converted.'
+    if (/cannot access|extensions gallery|missing host permission/i.test(message)) {
+      return 'Chrome does not allow extensions to read this page. Open a regular HTTP or HTTPS webpage.'
     }
-    const p = paragraphs[i];
-    if (p.type === 10) {
-      sequence++
+    return message
+  }
+
+  async function copyMarkdown() {
+    if (!source.value) return
+
+    try {
+      await navigator.clipboard.writeText(source.value)
+    } catch (error) {
+      source.focus()
+      source.select()
+      if (!document.execCommand('copy')) throw error
+    }
+
+    setStatus('Markdown copied to clipboard.', 'success')
+  }
+
+  function readHistory() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
+      return Array.isArray(parsed) ? parsed : []
+    } catch (error) {
+      return []
+    }
+  }
+
+  function saveHistory(title, url) {
+    const nextItem = {
+      title: String(title || 'Untitled page'),
+      url: String(url || ''),
+      convertedAt: new Date().toISOString()
+    }
+    const history = readHistory().filter(function (item) {
+      return item.url !== nextItem.url
+    })
+    history.unshift(nextItem)
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY_ITEMS)))
+  }
+
+  function toggleHistory() {
+    if (historyPanel.hidden) {
+      renderHistory()
+      source.hidden = true
+      historyPanel.hidden = false
+      historyButton.textContent = 'Back to Markdown'
     } else {
-      sequence = 0
-    }
-    const text = processParagraph(p, sequence);
-    lastPtype = p.type;
-    if (text !== story.markdown[i]) {
-      story.markdown.push(text)
+      showMarkdown()
     }
   }
-  return story
-}
 
-function processSection(s) {
-  let section = ''
-  if (s.backgroundImage) {
-    const imageWidth = parseInt(s.backgroundImage.originalWidth, 10)
-    const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + s.backgroundImage.id
-    section = '\n![](' + imageSrc + ')'
-  }
-  return section
-}
-
-function processParagraph(p, sequence) {
-  const markups_array = createMarkupsArray(p.markups)
-  if (markups_array.length > 0) {
-    let previousIndex = 0, text = p.text, tokens = []
-    let j = 0
-    for (; j < markups_array.length; j++) {
-      if (markups_array[j]) {
-        token = text.substring(previousIndex, j)
-        previousIndex = j
-        tokens.push(token)
-        tokens.push(markups_array[j])
-      }
-    }
-    tokens = processMarkupSpace(tokens)
-    tokens.push(text.substring(j - 1))
-    p.text = tokens.join('')
+  function showMarkdown() {
+    source.hidden = false
+    historyPanel.hidden = true
+    historyButton.textContent = 'History'
   }
 
-  let markup = ''
-  switch (p.type) {
-    case 1:
-      markup = '\n'
-      break
-    case 2:
-      p.text = '\n# ' + p.text.replace(/\n/g, '\n #')
-      break
-    case 3:
-      p.text = '\n## ' + p.text.replace(/\n/g, '\n ##')
-      break
-    case 4:
-      const imageWidth = parseInt(p.metadata.originalWidth, 10)
-      const imageSrc = MEDIUM_IMG_CDN + Math.max(imageWidth * 2, 2000) + '/' + p.metadata
-        .id
-      p.text = '\n![' + p.text + '](' + imageSrc + ')'
-      break
-    case 6:
-      markup = '>  '
-      break
-    case 7:
-      p.text = '> # ' + p.text.replace(/\n/g, '\n> #')
-      break
-    case 8:
-      p.text = '\n    ' + p.text.replace(/\n/g, '\n    ')
-      break
-    case 9:
-      markup = '\n* '
-      break
-    case 10:
-      markup = '\n ' + sequence + '. '
-      break
-    case 11:
-      p.text = '\n <iframe src="https://medium.com/media/' + p.iframe.mediaResourceId + '" frameborder=0></iframe>'
-      break
-    case 13:
-      markup = '\n### '
-      break
-    case 15:
-      p.text = '*' + p.text + '*'
-      break
+  function renderHistory() {
+    const history = readHistory()
+    historyList.replaceChildren()
+    emptyHistory.hidden = history.length > 0
+
+    history.forEach(function (item, index) {
+      const row = document.createElement('li')
+      row.className = 'history-item'
+
+      const details = document.createElement('div')
+      const title = document.createElement('div')
+      title.className = 'history-title'
+      title.textContent = item.title
+      const url = document.createElement('div')
+      url.className = 'history-url'
+      url.textContent = item.url
+      details.append(title, url)
+
+      const deleteButton = document.createElement('button')
+      deleteButton.type = 'button'
+      deleteButton.className = 'delete-history'
+      deleteButton.textContent = 'Remove'
+      deleteButton.addEventListener('click', function () {
+        const updated = readHistory()
+        updated.splice(index, 1)
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(updated))
+        renderHistory()
+      })
+
+      row.append(details, deleteButton)
+      historyList.appendChild(row)
+    })
   }
-
-  p.text = markup + p.text + '\n'
-
-  if (p.alignment === 2 && p.type !== 6 && p.type !== 7) {
-    p.text = '<center>' + p.text + '</center>'
-  }
-  return p.text
-}
-
-// for the first position is space
-function processMarkupSpace(tokens) {
-  let times = 0 // markup times
-  for (let i = 0; i < tokens.length; i++) {
-    const ele = tokens[i]
-    if (ele === '**' || ele === '*' || ele === '[' || ele === ']') {
-      times = times + 1;
-      if (times % 2 === 1 && tokens[i + 1] && tokens[i + 1][0] === ' ') {
-        tokens[i + 1] = tokens[i + 1].substring(1);
-        tokens[i - 1] = tokens[i - 1] + ' '
-        i = i + 1;
-      }
-    }
-  }
-  return tokens;
-}
-
-function addMarkup(markups_array, open, close, start, end) {
-  if (markups_array[start]) {
-    markups_array[start] += open
-  } else {
-    markups_array[start] = open
-  }
-  if (markups_array[end]) {
-    markups_array[end] += close
-  } else {
-    markups_array[end] = close
-  }
-  return markups_array
-}
-
-function createMarkupsArray(markups) {
-  let markups_array = []
-  if (!markups || markups.length === 0) {
-    return markups_array
-  }
-  for (let i = 0; i < markups.length; i++) {
-    const m = markups[i]
-    switch (m.type) {
-      case 1: // bold
-        addMarkup(markups_array, '**', '**', m.start, m.end)
-        break
-      case 2: // italic
-        addMarkup(markups_array, '*', '*', m.start, m.end)
-        break
-      case 3: // anchor tag
-        addMarkup(markups_array, '[', '](' + m.href + ')', m.start, m.end)
-        break
-      // case 10: // code tag
-      //   if (m.end - m.start < 30) {
-      //     addMarkup(markups_array, '`', '`', m.start, m.end)
-      //   }
-      //   break
-      default:
-        console.log('Unknown markup type' + m.type, m)
-        break
-    }
-  }
-  return markups_array
-}
-
-function copyToClipboard(input) {
-  const el = document.createElement('textarea');
-  el.style.fontsize = '12pt'
-  el.style.border = '0'
-  el.style.padding = '0'
-  el.style.margin = '0'
-  el.style.position = 'absolute'
-  el.style.left = '-9999px'
-  el.setAttribute('readonly', '')
-  el.value = input
-
-  document.body.appendChild(el)
-  el.select()
-
-  let success = false;
-  try {
-    success = document.execCommand('copy', true);
-  } catch (err) { }
-
-  document.body.removeChild(el);
-  return success;
-}
+})()

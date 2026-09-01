@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Building Reliable Conversion Pipelines</title>
+  <meta name="author" content="Alex Example">
+  <meta name="description" content="A practical guide to reliable document conversion.">
+</head>
+<body>
+  <header>
+    <nav>Home Products Pricing Subscribe</nav>
+  </header>
+  <main>
+    <article>
+      <h1>Building Reliable Conversion Pipelines</h1>
+      <p class="byline">By Alex Example</p>
+      <p>
+        Reliable document conversion starts by separating content extraction from output formatting.
+        Each stage can then be tested independently, observed clearly, and replaced without changing
+        the rest of the pipeline. This approach also produces useful error messages when a page does
+        not contain a conventional article structure.
+      </p>
+      <h2>Extract the meaningful content</h2>
+      <p>
+        A mature readability algorithm scores candidate elements, ignores navigation and advertising,
+        and preserves the headings, links, images, lists, and code blocks that belong to the article.
+        See the <a href="/guides/extraction">extraction guide</a> for a complete example.
+      </p>
+      <img src="/images/pipeline.png" alt="Conversion pipeline">
+      <pre><code class="language-js">const markdown = convert(article.content)</code></pre>
+      <table>
+        <thead><tr><th>Stage</th><th>Responsibility</th></tr></thead>
+        <tbody><tr><td>Readability</td><td>Extract content</td></tr></tbody>
+      </table>
+      <p>
+        The final Markdown should remain useful when copied into a repository, note-taking application,
+        or static site generator. Deterministic fixtures and browser-level tests protect that behavior.
+      </p>
+    </article>
+    <aside class="sidebar">Recommended products and unrelated promotional content.</aside>
+  </main>
+  <footer>Copyright Example Publisher</footer>
+</body>
+</html>

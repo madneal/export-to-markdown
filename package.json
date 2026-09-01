@@ -1,6 +1,25 @@
 {
+  "name": "export-to-markdown",
+  "version": "0.3.2",
+  "private": true,
+  "description": "Chrome extension that converts the active webpage to Markdown locally.",
+  "scripts": {
+    "vendor": "node tools/sync-vendor.mjs",
+    "vendor:check": "node tools/sync-vendor.mjs --check",
+    "test": "node --test",
+    "test:browser": "node tools/browser-e2e.mjs",
+    "package": "npm run vendor:check && npm test && sh tools/package-extension.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "archiver": "^2.1.1",
-    "del": "^3.0.0"
+    "@mozilla/readability": "0.6.0",
+    "turndown": "7.2.4",
+    "turndown-plugin-gfm": "1.0.2"
+  },
+  "devDependencies": {
+    "jsdom": "27.4.0",
+    "playwright": "1.62.1"
   }
 }

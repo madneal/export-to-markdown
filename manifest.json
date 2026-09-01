@@ -1,8 +1,8 @@
 {
     "name":"Export to Markdown",
     "short_name":"ExportToMarkdown",
-    "description":"This is utilized to export the articles to markdown format, supporting limited urls.",
-    "version":"0.3.1",
+    "description":"Convert the active HTTP or HTTPS webpage to Markdown locally from the extension popup.",
+    "version":"0.3.2",
     "manifest_version":3,
     "icons":{
         "16":"icons/medium-16.png",
@@ -11,11 +11,8 @@
         "128":"icons/medium.png"
     },
     "permissions":[
-        "tabs",
+        "activeTab",
         "scripting"
-    ],
-    "host_permissions":[
-        "https://*/*"
     ],
     "action":{
         "default_title":"Export to Markdown",

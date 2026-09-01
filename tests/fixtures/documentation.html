@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Extension Architecture Guide</title>
+</head>
+<body>
+  <nav>Products Blog Account Search</nav>
+  <main>
+    <article>
+      <h1>Extension Architecture Guide</h1>
+      <p>This short introduction summarizes the architecture guide and links to the detailed sections below.</p>
+    </article>
+    <section class="commentary-doc-section">
+      <h2>Design the extraction stage</h2>
+      <p>
+        The extraction stage receives the rendered document and identifies the meaningful page content. It must
+        preserve headings, paragraphs, lists, links, images, tables, and code while excluding navigation, account
+        controls, advertising, cookie prompts, and unrelated recommendations. A quality check compares candidate
+        lengths so a short summary is not mistaken for the complete technical document.
+      </p>
+      <p>
+        Documentation sites often place an introductory article beside a series of sibling sections inside the main
+        element. Selecting only the introductory article would technically return content but would omit most of the
+        page. The semantic fallback therefore remains important even when Readability returns a non-empty result.
+      </p>
+    </section>
+    <section class="commentary-doc-section">
+      <h2>Convert the complete document</h2>
+      <p>
+        After extraction, the converter produces deterministic GitHub Flavored Markdown. Links use absolute URLs,
+        code blocks retain their language, tables remain structured, and the page title appears exactly once. The
+        conversion runs locally and does not send the source document to any external service.
+      </p>
+      <p>
+        Browser-level tests invoke the real extension action, wait for the popup, inspect generated Markdown, retry
+        the conversion, and verify protected-page errors. This final section must be present in the exported output
+        or the quality comparison has selected an incomplete candidate.
+      </p>
+    </section>
+  </main>
+  <aside class="table-of-contents">Design Convert Test</aside>
+</body>
+</html>

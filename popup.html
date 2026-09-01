@@ -3,127 +3,232 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Export to Markdown</title>
   <style>
-    textarea {
-      width: 800px;
-      height: 600px;
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #202124;
+      background: #ffffff;
     }
 
-    .history-list {
-      font-size: 18px
+    * {
+      box-sizing: border-box;
     }
 
     body {
-      width: 800px;
-      height: 600px;
+      width: 720px;
+      min-height: 540px;
+      margin: 0;
+      background: #ffffff;
     }
 
-    .buttons li {
-      list-style: none;
-      display: inline;
-      margin-right: 5px;
-      font-weight: bold;
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #dadce0;
     }
 
-    h1,
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 650;
+      line-height: 24px;
+    }
+
+    #status {
+      max-width: 430px;
+      margin: 0;
+      color: #5f6368;
+      font-size: 13px;
+      line-height: 20px;
+      text-align: right;
+    }
+
+    #status[data-state="success"] {
+      color: #137333;
+    }
+
+    #status[data-state="error"] {
+      color: #b3261e;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e8eaed;
+    }
+
     button {
-      display: inline;
-      color: gray;
-      border-radius: 5px;
-      font-weight: bold;
-      filter: alpha(opacity=50)
+      min-height: 36px;
+      padding: 0 14px;
+      border: 1px solid #c4c7c5;
+      border-radius: 6px;
+      color: #1f1f1f;
+      background: #ffffff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
     }
 
-    #shadow {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      width: 100%;
-      background-color: #000;
-      opacity: .2;
-      filter: alpha(opacity=20);
+    button:hover:not(:disabled) {
+      background: #f8fafd;
     }
 
-    ul img {
-      width: 1.5rem;
-      height: 1.5rem;
+    button:focus-visible {
+      outline: 2px solid #0b57d0;
+      outline-offset: 2px;
+    }
+
+    button:disabled {
+      color: #9aa0a6;
+      background: #f1f3f4;
+      cursor: default;
+    }
+
+    #export-button {
+      border-color: #0b57d0;
+      color: #ffffff;
+      background: #0b57d0;
+    }
+
+    #export-button:hover:not(:disabled) {
+      background: #0842a0;
+    }
+
+    main {
       position: relative;
-      top: .4rem;
+      height: 444px;
+      padding: 16px 20px 20px;
     }
 
-    .load {
-      width: 50px;
-      height: 50px;
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      -webkit-animation: spin1 2s infinite linear;
-      -moz-animation: spin1 2s infinite linear;
-      -o-animation: spin1 2s infinite linear;
-      -ms-animation: spin1 2s infinite linear;
-      animation: spin1 2s infinite linear;
+    textarea {
       display: block;
-      visibility: hidden;
+      width: 100%;
+      height: 100%;
+      resize: none;
+      padding: 14px;
+      border: 1px solid #bdc1c6;
+      border-radius: 6px;
+      color: #202124;
+      background: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 20px;
     }
 
-    @-webkit-keyframes spin1 {
-      0% {
-        -webkit-transform: rotate(0deg);
-      }
-      100% {
-        -webkit-transform: rotate(360deg);
-      }
+    textarea:focus {
+      border-color: #0b57d0;
+      outline: 1px solid #0b57d0;
     }
 
-    @-moz-keyframes spin1 {
-      0% {
-        -moz-transform: rotate(0deg);
-      }
-      100% {
-        -moz-transform: rotate(360deg);
-      }
+    #history-panel {
+      height: 100%;
+      overflow-y: auto;
+      border-top: 1px solid #e8eaed;
     }
 
-    @-o-keyframes spin1 {
-      0% {
-        -o-transform: rotate(0deg);
-      }
-      100% {
-        -o-transform: rotate(360deg);
-      }
+    #history-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
-    @-ms-keyframes spin1 {
-      0% {
-        -ms-transform: rotate(0deg);
-      }
-      100% {
-        -ms-transform: rotate(360deg);
+    .history-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 4px;
+      border-bottom: 1px solid #e8eaed;
+    }
+
+    .history-title,
+    .history-url {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .history-url {
+      margin-top: 4px;
+      color: #5f6368;
+      font-size: 12px;
+    }
+
+    .delete-history {
+      min-width: 72px;
+      color: #b3261e;
+    }
+
+    #empty-history {
+      margin: 32px 0;
+      color: #5f6368;
+      text-align: center;
+    }
+
+    #loading {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, .78);
+    }
+
+    #loading img {
+      width: 44px;
+      height: 44px;
+      animation: spin 1.2s linear infinite;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
     }
   </style>
-  <title>export to markdown</title>
 </head>
-
 <body>
+  <header>
+    <h1>Export to Markdown</h1>
+    <p id="status" role="status" aria-live="polite" data-state="idle">Ready</p>
+  </header>
 
-  <div class="main">
-    <ul class="buttons">
-      <li><button class="export">export current page</button></li>
-      <li><button class="copy">copy to clipboard</button></li>
-      <li><button class="history">history</button></li>
-    </ul>
+  <nav class="toolbar" aria-label="Export actions">
+    <button id="export-button" type="button">Convert current page</button>
+    <button id="copy-button" type="button" disabled>Copy Markdown</button>
+    <button id="history-button" type="button">History</button>
+  </nav>
 
-    <span><img src="load.svg" class="load"></span>
-    <div class="left-area">
-      <textarea id="source"></textarea>
+  <main>
+    <textarea id="source" aria-label="Generated Markdown" spellcheck="false" placeholder="Markdown output"></textarea>
+    <section id="history-panel" aria-label="Conversion history" hidden>
+      <ul id="history-list"></ul>
+      <p id="empty-history" hidden>No conversion history</p>
+    </section>
+    <div id="loading" hidden aria-hidden="true">
+      <img src="load.svg" alt="">
     </div>
-    <div class="right-area"></div>
-  </div>
-  <script src="scripts/snarkdown.js"></script>
-  <script src="scripts/turndown.min.js"></script>
+  </main>
+
+  <script src="scripts/vendor/turndown.js"></script>
+  <script src="scripts/vendor/turndown-plugin-gfm.js"></script>
+  <script src="scripts/converter.js"></script>
   <script src="scripts/widget.js"></script>
 </body>
-
 </html>
